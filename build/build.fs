@@ -82,7 +82,7 @@ let mutable latestEntry =
 let mutable linkReferenceForLatestEntry = ""
 let mutable changelogBackupFilename = ""
 
-let targetFramework =  "net6.0"
+let targetFramework =  "net7.0"
 
 // RuntimeIdentifiers: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
 // dotnet-packaging Tasks: https://github.com/qmfrederik/dotnet-packaging/blob/0c8e063ada5ba0de2b194cd3fad8308671b48092/Packaging.Targets/build/Packaging.Targets.targets
@@ -304,7 +304,7 @@ let updateChangelog ctx =
     let linkReferenceForUnreleased = sprintf "[Unreleased]: %s/compare/%s...%s" gitHubRepoUrl (tagFromVersionNumber newVersion.AsString) "HEAD"
     let tailLines = File.read changelogFilename |> List.ofSeq |> List.rev
 
-    let isRef line = System.Text.RegularExpressions.Regex.IsMatch(line, @"^\[.+?\]:\s?[a-z]+://.*$")
+    let isRef (line:string) = System.Text.RegularExpressions.Regex.IsMatch(line, @"^\[.+?\]:\s?[a-z]+://.*$")
     let linkReferenceTargets =
         tailLines
         |> List.skipWhile String.isNullOrWhiteSpace

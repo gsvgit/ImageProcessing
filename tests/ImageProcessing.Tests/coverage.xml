@@ -2,10 +2,10 @@
 <CoverageSession xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Summary numSequencePoints="52" visitedSequencePoints="3" numBranchPoints="27" visitedBranchPoints="0" sequenceCoverage="5.77" branchCoverage="0" maxCyclomaticComplexity="5" minCyclomaticComplexity="1" visitedClasses="1" numClasses="7" visitedMethods="2" numMethods="15" minCrapScore="1" maxCrapScore="30" />
   <Modules>
-    <Module hash="0C-2C-62-52-7D-3C-5F-BA-2C-F7-B4-A7-73-0E-91-3A-F3-AD-63-F9">
+    <Module hash="4D-1D-00-91-19-7A-30-83-24-4F-7F-87-20-CE-FF-89-21-93-FE-1D">
       <Summary numSequencePoints="52" visitedSequencePoints="3" numBranchPoints="27" visitedBranchPoints="0" sequenceCoverage="5.77" branchCoverage="0" maxCyclomaticComplexity="5" minCyclomaticComplexity="1" visitedClasses="1" numClasses="7" visitedMethods="2" numMethods="15" minCrapScore="1" maxCrapScore="30" />
-      <ModulePath>/home/gsv/Projects/ImageProcessing/tests/ImageProcessing.Tests/bin/Debug/net6.0/ImageProcessing.dll</ModulePath>
-      <ModuleTime>2023-01-11T08:35:22.1631341Z</ModuleTime>
+      <ModulePath>/home/gsv/Projects/ImageProcessing/tests/ImageProcessing.Tests/bin/Debug/net7.0/ImageProcessing.dll</ModulePath>
+      <ModuleTime>2023-01-11T09:38:21.0230483Z</ModuleTime>
       <ModuleName>ImageProcessing</ModuleName>
       <Files>
         <File uid="1" fullPath="/home/gsv/Projects/ImageProcessing/src/ImageProcessing/Main.fs" />
@@ -351,9 +351,9 @@
         </Class>
       </Classes>
     </Module>
-    <Module skippedDueTo="Filter" hash="D3-70-CD-C1-7F-A9-52-D4-72-CE-A4-3E-B5-EA-37-AC-B6-F2-BD-ED">
-      <ModulePath>/home/gsv/Projects/ImageProcessing/tests/ImageProcessing.Tests/bin/Debug/net6.0/ImageProcessing.Tests.dll</ModulePath>
-      <ModuleTime>2023-01-11T08:35:24.4631098Z</ModuleTime>
+    <Module skippedDueTo="Filter" hash="FF-6B-8E-B9-92-03-A5-C0-F9-9B-BF-CB-DE-EC-1F-BF-44-B1-47-B6">
+      <ModulePath>/home/gsv/Projects/ImageProcessing/tests/ImageProcessing.Tests/bin/Debug/net7.0/ImageProcessing.Tests.dll</ModulePath>
+      <ModuleTime>2023-01-11T09:38:22.9310665Z</ModuleTime>
       <ModuleName>ImageProcessing.Tests</ModuleName>
       <Classes />
     </Module>
