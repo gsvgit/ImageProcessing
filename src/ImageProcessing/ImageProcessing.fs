@@ -88,9 +88,7 @@ let applyFilterGPUKernel (clContext: ClContext) localWorkSize =
 
     let kernel = clContext.Compile kernel
 
-    fun (commandQueue: MailboxProcessor<_>) (filter: ClArray<float32>) filterD (img: ClArray<byte>) imgH imgW ->
-
-        let result = clContext.CreateClArray(img.Length, allocationMode = AllocationMode.Default)
+    fun (commandQueue: MailboxProcessor<_>) (filter: ClArray<float32>) filterD (img: ClArray<byte>) imgH imgW (result:ClArray<_>)->
 
         let ndRange = Range1D.CreateValid(imgH * imgW, localWorkSize)
 
@@ -114,24 +112,23 @@ let applyFiltersGPU (clContext: ClContext) localWorkSize =
                     |]
             let clImage = clContext.CreateClArray<_> img
 
-            let  mutable res = None
+            //let mutable res = None
+            let mutable input = clImage// clContext.CreateClArray(img.Length, allocationMode = AllocationMode.Default)
+            let mutable output = clContext.CreateClArray(img.Length, allocationMode = AllocationMode.Default)
 
             for filter in filters do
                 let filter = Array.concat filter
                 let filterD = (Array.length filter) / 2
                 let clFilter = clContext.CreateClArray<_> filter
-                match res with
-                | None ->
-                    res <- Some (kernel queue clFilter filterD clImage imgH imgW)
-                | Some img ->
-                    res <- Some (kernel queue clFilter filterD img imgH imgW)
-                    queue.Post(Msg.CreateFreeMsg img)
+                let oldInput = input
+                input <- kernel queue clFilter filterD input imgH imgW output
+                output <- oldInput
                 queue.Post(Msg.CreateFreeMsg clFilter)
 
             let result' = Array.zeroCreate (imgH * imgW)
-            let result' = queue.PostAndReply(fun ch -> Msg.CreateToHostMsg(res.Value, result', ch))
+            let result' = queue.PostAndReply(fun ch -> Msg.CreateToHostMsg(input, result', ch))
             let result = Array2D.zeroCreate imgH imgW
             Array.Parallel.iteri (fun x v -> result.[x / imgW, x % imgW] <-  v) result'
-            queue.Post(Msg.CreateFreeMsg clImage)
-            queue.Post(Msg.CreateFreeMsg res.Value)
+            queue.Post(Msg.CreateFreeMsg input)
+            queue.Post(Msg.CreateFreeMsg output)
             result

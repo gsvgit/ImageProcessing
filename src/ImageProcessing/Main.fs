@@ -9,8 +9,8 @@ module Main =
     [<EntryPoint>]
     let main (argv: string array) =
         let device =
-            //ClDevice.GetAvailableDevices(platform=Platform.Nvidia) |> Seq.head
-            ClDevice.GetFirstAppropriateDevice()
+            ClDevice.GetAvailableDevices(platform=Platform.Nvidia) |> Seq.head
+            //ClDevice.GetFirstAppropriateDevice()
         printfn $"Device: %A{device.Name}"
 
         let context = ClContext(device)
