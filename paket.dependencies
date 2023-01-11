@@ -10,6 +10,7 @@ nuget altcover ~> 8.2.825
 nuget Packaging.Targets 0.1.208
 
 nuget SixLabors.ImageSharp
+nuget Brahma.FSharp
 // [ FAKE GROUP ]
 group Build
     storage: none
