@@ -4,9 +4,6 @@ open Brahma.FSharp
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 
-
-
-
 let loadAs2DArray (file:string) =
     let img = Image.Load<L8> file
     let res = Array2D.zeroCreate img.Height img.Width
@@ -117,18 +114,24 @@ let applyFiltersGPU (clContext: ClContext) localWorkSize =
                     |]
             let clImage = clContext.CreateClArray<_> img
 
-            let  mutable res = Unchecked.defaultof<_>
+            let  mutable res = None
 
             for filter in filters do
                 let filter = Array.concat filter
                 let filterD = (Array.length filter) / 2
                 let clFilter = clContext.CreateClArray<_> filter
-                res <- kernel queue clFilter filterD clImage imgH imgW
+                match res with
+                | None ->
+                    res <- Some (kernel queue clFilter filterD clImage imgH imgW)
+                | Some img ->
+                    res <- Some (kernel queue clFilter filterD img imgH imgW)
+                    queue.Post(Msg.CreateFreeMsg img)
                 queue.Post(Msg.CreateFreeMsg clFilter)
 
             let result' = Array.zeroCreate (imgH * imgW)
-            let result' = queue.PostAndReply(fun ch -> Msg.CreateToHostMsg(res, result', ch))
+            let result' = queue.PostAndReply(fun ch -> Msg.CreateToHostMsg(res.Value, result', ch))
             let result = Array2D.zeroCreate imgH imgW
             Array.Parallel.iteri (fun x v -> result.[x / imgW, x % imgW] <-  v) result'
-            clImage.Dispose()
+            queue.Post(Msg.CreateFreeMsg clImage)
+            queue.Post(Msg.CreateFreeMsg res.Value)
             result
