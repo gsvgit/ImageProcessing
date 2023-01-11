@@ -7,5 +7,7 @@ module Main =
     [<EntryPoint>]
     let main (argv: string array) =
         let grayscaleImage = ImageProcessing.loadAs2DArray demoFile
-        ImageProcessing.save2DByteArrayAsImage grayscaleImage "../../../../../out/demo_grayscale.jpg"
+        let blur = ImageProcessing.applyFilter ImageProcessing.gaussianBlurKernel grayscaleImage
+        let edges = ImageProcessing.applyFilter ImageProcessing.edgesKernel blur
+        ImageProcessing.save2DByteArrayAsImage edges "../../../../../out/demo_grayscale.jpg"
         0

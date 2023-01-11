@@ -26,7 +26,7 @@ let save2DByteArrayAsImage (imageData: byte[,]) file =
         |> Array.ofSeq
     let img = Image.LoadPixelData<L8>(flat2Darray imageData,w,h)
     img.Save file
-    
+
 let gaussianBlurKernel =
     [|
       [| 1; 4;  6;  4;  1|]
@@ -47,7 +47,7 @@ let edgesKernel =
     |]
     |> Array.map (Array.map float32)
 
-let applyFilter (filter: 't[][]) (img: byte[,]) =
+let applyFilter (filter: float32[][]) (img: byte[,]) =
     let imgH = img.GetLength 0
     let imgW = img.GetLength 1
     let filterD = (Array.length filter) / 2
@@ -58,9 +58,9 @@ let applyFilter (filter: 't[][]) (img: byte[,]) =
               for i in px - filterD .. px + filterD do
                 for j in py - filterD .. py + filterD do
                     if i < 0 || i >= imgH || j < 0 || j >= imgW
-                    then float img.[px,py]
-                    else float img.[i,j]
+                    then float32 img.[px,py]
+                    else float32 img.[i,j]
             |]
-        Array.fold2 (fun s x y -> s + x * y) 0.0 filter dataToHandle
+        Array.fold2 (fun s x y -> s + x * y) 0.0f filter dataToHandle
 
     Array2D.mapi (fun x y _ -> byte (processPixel x y)) img
