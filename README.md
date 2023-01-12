@@ -1,6 +1,6 @@
 # ImageProcessing
 
-Simple image processing on GPGPU using [Brahma.FSharp](https://github.com/YaccConstructor/Brahma.FSharp).
+Simple image processing on GPGPU in F# using [Brahma.FSharp](https://github.com/YaccConstructor/Brahma.FSharp).
 
 ---
 
@@ -16,7 +16,7 @@ GitHub Actions |
 
 Package | Stable | Prerelease
 --- | --- | ---
-ImageProcessing | [![NuGet Badge](https://buildstats.info/nuget/ImageProcessing)](https://www.nuget.org/packages/ImageProcessing/) | [![NuGet Badge](https://buildstats.info/nuget/ImageProcessing?includePreReleases=true)](https://www.nuget.org/packages/ImageProcessing/)
+ImageProcessing |  | 
 
 
 ---
@@ -25,13 +25,8 @@ ImageProcessing | [![NuGet Badge](https://buildstats.info/nuget/ImageProcessing)
 
 Make sure the following **requirements** are installed on your system:
 
-- [dotnet SDK](https://www.microsoft.com/net/download/core) 3.0 or higher
-- [Mono](http://www.mono-project.com/) if you're on Linux or macOS.
-
-or
-
-- [VSCode Dev Container](https://code.visualstudio.com/docs/remote/containers)
-
+- [dotnet SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) 7.0 or higher
+- OpenCL-compatible device with respective driver installed.
 
 ---
 
@@ -47,4 +42,4 @@ $ ./build.sh  <optional buildtarget>// on unix
 
 ### Build Targets
 
-For details looc at [MiniScaffold](https://github.com/TheAngryByrd/MiniScaffold), we use it in our project.
+For details look at [MiniScaffold](https://github.com/TheAngryByrd/MiniScaffold), we use it in our project.
