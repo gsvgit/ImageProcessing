@@ -1,16 +1,18 @@
 module ImageProcessing.Streaming
 
+open ImageProcessing.ImageProcessing
+
 let listAllFiles dir =
     let files = System.IO.Directory.GetFiles dir
     List.ofArray files
 
 type msg =
-    | Img of string*byte[,]
+    | Img of Image
     | EOS of AsyncReplyChannel<unit>
 
 let imgSaver outDir =
-    let outFile (fileFullPath:string) =
-        System.IO.Path.Combine(outDir, System.IO.Path.GetFileName fileFullPath)
+    let outFile (imgName:string) =
+        System.IO.Path.Combine(outDir, imgName)
 
     MailboxProcessor.Start(fun inbox ->
         let rec loop () =
@@ -20,9 +22,9 @@ let imgSaver outDir =
                 | EOS ch ->
                     printfn "Image saver is finished!"
                     ch.Reply()
-                | Img (file, img) ->
-                    printfn $"Save: %A{file}"
-                    ImageProcessing.save2DByteArrayAsImage img (outFile file)
+                | Img img ->
+                    printfn $"Save: %A{img.Name}"
+                    saveImage img (outFile img.Name)
                     return! loop ()
             }
         loop ()
@@ -42,19 +44,28 @@ let imgProcessor filterApplicator (imgSaver:MailboxProcessor<_>) =
                     imgSaver.PostAndReply EOS
                     printfn "Image processor is finished!"
                     ch.Reply()
-                | Img (file,img) ->
-                    printfn $"Filter: %A{file}"
+                | Img img ->
+                    printfn $"Filter: %A{img.Name}"
                     let filtered = filter img
-                    imgSaver.Post (Img (file,filtered))
+                    imgSaver.Post (Img filtered)
                     return! loop (not cnt)
             }
         loop true
         )
 
-let processAllFiles inDir outDir filterApplicator =
-    let imgSaver = imgSaver outDir
-    let imgProcessor = imgProcessor filterApplicator imgSaver
+let processAllFiles inDir outDir filterApplicators =
+    let mutable cnt = 0
+    let imgProcessors =
+        filterApplicators
+        |> List.map (fun x ->
+            let imgSaver = imgSaver outDir
+            imgProcessor x imgSaver
+        )
+        |> Array.ofList
     let filesToProcess = listAllFiles inDir
     for file in filesToProcess do
-        imgProcessor.Post <| Img(file, ImageProcessing.loadAs2DArray file)
-    imgProcessor.PostAndReply EOS
+        (imgProcessors
+        |> Array.minBy(fun p -> p.CurrentQueueLength)).Post <| Img(loadAsImage file)
+        cnt <- cnt + 1
+    for imgProcessor in imgProcessors do imgProcessor.PostAndReply EOS
+    //imgSaver.PostAndReply EOS

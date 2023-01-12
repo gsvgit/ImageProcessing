@@ -1,8 +1,23 @@
 module ImageProcessing.ImageProcessing
 
+open System
 open Brahma.FSharp
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
+
+[<Struct>]
+type Image =
+    val Data: array<byte>
+    val Width: int
+    val Height: int
+    val Name: string
+    new (data, width, height, name) =
+        {
+            Data= data
+            Width = width
+            Height = height
+            Name = name
+        }
 
 let loadAs2DArray (file:string) =
     let img = Image.Load<L8> file
@@ -12,6 +27,12 @@ let loadAs2DArray (file:string) =
             res.[j,i] <- img.Item(i,j).PackedValue
     printfn $"H=%A{img.Height} W=%A{img.Width}"
     res
+
+let loadAsImage (file:string) =
+    let img = Image.Load<L8> file
+    let buf = Array.zeroCreate<byte> (img.Width*img.Height)
+    img.CopyPixelDataTo (Span<byte> buf)
+    Image(buf, img.Width, img.Height, System.IO.Path.GetFileName file)
 
 let save2DByteArrayAsImage (imageData: byte[,]) file =
     let h = imageData.GetLength 0
@@ -23,6 +44,10 @@ let save2DByteArrayAsImage (imageData: byte[,]) file =
                       yield array2D.[x, y] }
         |> Array.ofSeq
     let img = Image.LoadPixelData<L8>(flat2Darray imageData,w,h)
+    img.Save file
+
+let saveImage (image:Image) file =
+    let img = Image.LoadPixelData<L8>(image.Data,image.Width,image.Height)
     img.Save file
 
 let gaussianBlurKernel =
@@ -103,32 +128,22 @@ let applyFilterGPUKernel (clContext: ClContext) localWorkSize =
 let applyFiltersGPU (clContext: ClContext) localWorkSize =
         let kernel = applyFilterGPUKernel clContext localWorkSize
         let queue = clContext.QueueProvider.CreateQueue()
-        fun (filters: list<float32[][]>) (img: byte[,]) ->
-            let imgH = img.GetLength 0
-            let imgW = img.GetLength 1
-            let img =
-                    [| for x in 0 .. Array2D.length1 img - 1 do
-                       yield! [| for y in 0 .. Array2D.length2 img - 1 -> img.[x, y] |]
-                    |]
-            let clImage = clContext.CreateClArray<_> img
+        fun (filters: list<float32[][]>) (img: Image) ->
 
-            //let mutable res = None
-            let mutable input = clImage// clContext.CreateClArray(img.Length, allocationMode = AllocationMode.Default)
-            let mutable output = clContext.CreateClArray(img.Length, allocationMode = AllocationMode.Default)
+            let mutable input = clContext.CreateClArray<_> img.Data
+            let mutable output = clContext.CreateClArray(img.Data.Length, allocationMode = AllocationMode.Default)
 
             for filter in filters do
                 let filter = Array.concat filter
                 let filterD = (Array.length filter) / 2
-                let clFilter = clContext.CreateClArray<_> filter
+                let clFilter = clContext.CreateClArray<_>(filter,HostAccessMode.NotAccessible,DeviceAccessMode.ReadOnly)
                 let oldInput = input
-                input <- kernel queue clFilter filterD input imgH imgW output
+                input <- kernel queue clFilter filterD input img.Height img.Width output
                 output <- oldInput
                 queue.Post(Msg.CreateFreeMsg clFilter)
 
-            let result' = Array.zeroCreate (imgH * imgW)
-            let result' = queue.PostAndReply(fun ch -> Msg.CreateToHostMsg(input, result', ch))
-            let result = Array2D.zeroCreate imgH imgW
-            Array.Parallel.iteri (fun x v -> result.[x / imgW, x % imgW] <-  v) result'
+            let result = Array.zeroCreate (img.Height * img.Width)
+            let result = queue.PostAndReply(fun ch -> Msg.CreateToHostMsg(input, result, ch))
             queue.Post(Msg.CreateFreeMsg input)
             queue.Post(Msg.CreateFreeMsg output)
-            result
+            Image (result, img.Width, img.Height, img.Name)
