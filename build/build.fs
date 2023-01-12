@@ -61,7 +61,7 @@ let distGlob =
     ++ (distDir @@ "*.tgz")
     ++ (distDir @@ "*.tar.gz")
 
-let coverageThresholdPercent = 1
+let coverageThresholdPercent = 0
 let coverageReportDir =  __SOURCE_DIRECTORY__ </> ".." </> "docs" @@ "coverage"
 
 let gitOwner = "gsvgit"

@@ -222,11 +222,49 @@ for (i = 0, l = charts.length; i < l; i++) {
 
 var assemblies = [
   {
+    "name": "Brahma.FSharp.OpenCL.Shared",
+    "classes": [
+      { "name": "Brahma.FSharp.KernelLangExtensions", "rp": "Brahma.FSharp.OpenCL.Shared_KernelLangExtensions.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 42, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "Brahma.FSharp.KernelLangExtensionsModule", "rp": "Brahma.FSharp.OpenCL.Shared_KernelLangExtensionsModule.html", "cl": 0, "ucl": 17, "cal": 17, "tl": 42, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
+    ]},
+  {
     "name": "ImageProcessing",
     "classes": [
-      { "name": "ImageProcessing.AssemblyInfo", "rp": "ImageProcessing_AssemblyInfo.html", "cl": 0, "ucl": 22, "cal": 22, "tl": 98, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "ImageProcessing.Main", "rp": "ImageProcessing_Main.html", "cl": 0, "ucl": 21, "cal": 21, "tl": 98, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 12, "lch": [], "bch": [], "hc": [] },
-      { "name": "ImageProcessing.Say", "rp": "ImageProcessing_Say.html", "cl": 3, "ucl": 4, "cal": 7, "tl": 98, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "ImageProcessing.ImageProcessing", "rp": "ImageProcessing_ImageProcessing.html", "cl": 0, "ucl": 156, "cal": 156, "tl": 304, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 26, "lch": [], "bch": [], "hc": [] },
+      { "name": "ImageProcessing.Main", "rp": "ImageProcessing_Main.html", "cl": 0, "ucl": 23, "cal": 23, "tl": 53, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "ImageProcessing.Streaming", "rp": "ImageProcessing_Streaming.html", "cl": 0, "ucl": 54, "cal": 54, "tl": 80, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 10, "lch": [], "bch": [], "hc": [] },
+    ]},
+  {
+    "name": "YC.OpenCL.NET",
+    "classes": [
+      { "name": "Microsoft.CodeAnalysis.EmbeddedAttribute", "rp": "YC.OpenCL.NET_EmbeddedAttribute.html", "cl": 0, "ucl": 0, "cal": 0, "tl": 0, "ct": "MethodCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.ArraySegment<T>", "rp": "YC.OpenCL.NET_ArraySegment_1.html", "cl": 0, "ucl": 21, "cal": 21, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 14, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Cl", "rp": "YC.OpenCL.NET_Cl.html", "cl": 0, "ucl": 266, "cal": 266, "tl": 2580, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 50, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.CommandQueue", "rp": "YC.OpenCL.NET_CommandQueue.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Context", "rp": "YC.OpenCL.NET_Context.html", "cl": 0, "ucl": 10, "cal": 10, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.ContextProperty", "rp": "YC.OpenCL.NET_ContextProperty.html", "cl": 0, "ucl": 8, "cal": 8, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Device", "rp": "YC.OpenCL.NET_Device.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Environment", "rp": "YC.OpenCL.NET_Environment.html", "cl": 0, "ucl": 18, "cal": 18, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Event", "rp": "YC.OpenCL.NET_Event.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Extensions.CLExtensions", "rp": "YC.OpenCL.NET_CLExtensions.html", "cl": 0, "ucl": 111, "cal": 111, "tl": 312, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 16, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Extensions.KernelWrapperBase", "rp": "YC.OpenCL.NET_KernelWrapperBase.html", "cl": 0, "ucl": 27, "cal": 27, "tl": 99, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 4, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.ImageFormat", "rp": "YC.OpenCL.NET_ImageFormat.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.InfoBuffer", "rp": "YC.OpenCL.NET_InfoBuffer.html", "cl": 0, "ucl": 32, "cal": 32, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 6, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.InfoBufferArray", "rp": "YC.OpenCL.NET_InfoBufferArray.html", "cl": 0, "ucl": 17, "cal": 17, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 4, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.InfoBufferArray<T>", "rp": "YC.OpenCL.NET_InfoBufferArray_1.html", "cl": 0, "ucl": 18, "cal": 18, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 4, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Kernel", "rp": "YC.OpenCL.NET_Kernel.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Mem", "rp": "YC.OpenCL.NET_Mem.html", "cl": 0, "ucl": 10, "cal": 10, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Mem<T>", "rp": "YC.OpenCL.NET_Mem_1.html", "cl": 0, "ucl": 12, "cal": 12, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.MemDebugView<T>", "rp": "YC.OpenCL.NET_MemDebugView_1.html", "cl": 0, "ucl": 17, "cal": 17, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.PinnedObject", "rp": "YC.OpenCL.NET_PinnedObject.html", "cl": 0, "ucl": 7, "cal": 7, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Platform", "rp": "YC.OpenCL.NET_Platform.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Program", "rp": "YC.OpenCL.NET_Program.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Sampler", "rp": "YC.OpenCL.NET_Sampler.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.Tasks.Kernel", "rp": "YC.OpenCL.NET_Kernel.2.html", "cl": 0, "ucl": 321, "cal": 321, "tl": 514, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 118, "lch": [], "bch": [], "hc": [] },
+      { "name": "OpenCL.Net.TypeSize<T>", "rp": "YC.OpenCL.NET_TypeSize_1.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 974, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "System.Runtime.CompilerServices.NullableAttribute", "rp": "YC.OpenCL.NET_NullableAttribute.html", "cl": 0, "ucl": 0, "cal": 0, "tl": 0, "ct": "MethodCoverage", "mc": 0, "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "System.Runtime.CompilerServices.NullableContextAttribute", "rp": "YC.OpenCL.NET_NullableContextAttribute.html", "cl": 0, "ucl": 0, "cal": 0, "tl": 0, "ct": "MethodCoverage", "mc": 0, "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "System.Runtime.CompilerServices.RefSafetyRulesAttribute", "rp": "YC.OpenCL.NET_RefSafetyRulesAttribute.html", "cl": 0, "ucl": 0, "cal": 0, "tl": 0, "ct": "MethodCoverage", "mc": 0, "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -240,17 +278,171 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "ImageProcessing", "class": "ImageProcessing.Main", "reportPath": "ImageProcessing_Main.html", "methodName": "System.Int32 ImageProcessing.Main::main(System.String[])", "methodShortName": "main(...)", "fileIndex": 0, "line": 77,
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Tasks.Kernel", "reportPath": "YC.OpenCL.NET_Kernel.2.html", "methodName": "System.String OpenCL.Net.Tasks.Kernel::TranslateType(System.String,System.Int32)", "methodShortName": "TranslateType(...)", "fileIndex": 0, "line": 136,
+    "metrics": [
+      { "value": 68, "exceeded": true },
+      { "value": 1512, "exceeded": true },
+      { "value": 4692, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Tasks.Kernel", "reportPath": "YC.OpenCL.NET_Kernel.2.html", "methodName": "System.String OpenCL.Net.Tasks.Kernel::ProcessKernelFile(System.String,System.String,System.Boolean,System.String)", "methodShortName": "ProcessKernelFile(...)", "fileIndex": 0, "line": 197,
+    "metrics": [
+      { "value": 14, "exceeded": false },
+      { "value": 192, "exceeded": false },
+      { "value": 210, "exceeded": true },
+    ]},
+  {
+    "assembly": "ImageProcessing", "class": "ImageProcessing.ImageProcessing", "reportPath": "ImageProcessing_ImageProcessing.html", "methodName": "System.Single ImageProcessing.ImageProcessing/processPixel@174::Invoke(System.Int32,System.Int32)", "methodShortName": "Invoke(...)", "fileIndex": 0, "line": 174,
+    "metrics": [
+      { "value": 9, "exceeded": false },
+      { "value": 64, "exceeded": false },
+      { "value": 90, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Tasks.Kernel", "reportPath": "YC.OpenCL.NET_Kernel.2.html", "methodName": "System.Boolean OpenCL.Net.Tasks.Kernel::Execute()", "methodShortName": "Execute()", "fileIndex": 0, "line": 53,
+    "metrics": [
+      { "value": 9, "exceeded": false },
+      { "value": 16, "exceeded": false },
+      { "value": 90, "exceeded": true },
+    ]},
+  {
+    "assembly": "ImageProcessing", "class": "ImageProcessing.ImageProcessing", "reportPath": "ImageProcessing_ImageProcessing.html", "methodName": "System.Int32 ImageProcessing.ImageProcessing/Pipe #1 input at line 56@57::GenerateNext(System.Collections.Generic.IEnumerable`1<a>&)", "methodShortName": "GenerateNext(...)", "fileIndex": 0, "line": 57,
+    "metrics": [
+      { "value": 8, "exceeded": false },
+      { "value": 4, "exceeded": false },
+      { "value": 72, "exceeded": true },
+    ]},
+  {
+    "assembly": "ImageProcessing", "class": "ImageProcessing.Streaming", "reportPath": "ImageProcessing_Streaming.html", "methodName": "System.Void ImageProcessing.Streaming::processAllFiles(System.String,System.String,Microsoft.FSharp.Collections.FSharpList`1<Microsoft.FSharp.Core.FSharpFunc`2<ImageProcessing.ImageProcessing/Image,ImageProcessing.ImageProcessing/Image>>)", "methodShortName": "processAllFiles(...)", "fileIndex": 0, "line": 58,
+    "metrics": [
+      { "value": 7, "exceeded": false },
+      { "value": 8, "exceeded": false },
+      { "value": 56, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Cl", "reportPath": "YC.OpenCL.NET_Cl.html", "methodName": "System.IntPtr OpenCL.Net.Cl::ImportResolver(System.String,System.Reflection.Assembly,System.Nullable`1<System.Runtime.InteropServices.DllImportSearchPath>)", "methodShortName": "ImportResolver(...)", "fileIndex": 0, "line": 41,
+    "metrics": [
+      { "value": 7, "exceeded": false },
+      { "value": 32, "exceeded": false },
+      { "value": 56, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Cl", "reportPath": "YC.OpenCL.NET_Cl.html", "methodName": "OpenCL.Net.Context OpenCL.Net.Cl::CreateContext(System.String,OpenCL.Net.DeviceType,OpenCL.Net.ErrorCode&)", "methodShortName": "CreateContext(...)", "fileIndex": 2, "line": 92,
+    "metrics": [
+      { "value": 7, "exceeded": false },
+      { "value": 32, "exceeded": false },
+      { "value": 56, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.KernelWrapperBase", "reportPath": "YC.OpenCL.NET_KernelWrapperBase.html", "methodName": "System.UInt32 OpenCL.Net.Extensions.KernelWrapperBase::GetWorkDimension(System.UInt32,System.UInt32,System.UInt32)", "methodShortName": "GetWorkDimension(...)", "fileIndex": 0, "line": 38,
+    "metrics": [
+      { "value": 7, "exceeded": false },
+      { "value": 0, "exceeded": false },
+      { "value": 56, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.CLExtensions", "reportPath": "YC.OpenCL.NET_CLExtensions.html", "methodName": "OpenCL.Net.Event OpenCL.Net.Extensions.CLExtensions::EnqueueKernel(OpenCL.Net.CommandQueue,OpenCL.Net.Kernel,System.UInt32,System.UInt32,System.UInt32,System.UInt32,System.UInt32,System.UInt32,OpenCL.Net.Event[])", "methodShortName": "EnqueueKernel(...)", "fileIndex": 0, "line": 182,
+    "metrics": [
+      { "value": 6, "exceeded": false },
+      { "value": 0, "exceeded": false },
+      { "value": 42, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.KernelWrapperBase", "reportPath": "YC.OpenCL.NET_KernelWrapperBase.html", "methodName": "System.IntPtr[] OpenCL.Net.Extensions.KernelWrapperBase::GetWorkSizes(System.UInt32,System.UInt32,System.UInt32)", "methodShortName": "GetWorkSizes(...)", "fileIndex": 0, "line": 43,
+    "metrics": [
+      { "value": 6, "exceeded": false },
+      { "value": 0, "exceeded": false },
+      { "value": 42, "exceeded": true },
+    ]},
+  {
+    "assembly": "ImageProcessing", "class": "ImageProcessing.ImageProcessing", "reportPath": "ImageProcessing_ImageProcessing.html", "methodName": "System.Byte[0...,0...] ImageProcessing.ImageProcessing::loadAs2DArray(System.String)", "methodShortName": "loadAs2DArray(...)", "fileIndex": 0, "line": 24,
     "metrics": [
       { "value": 5, "exceeded": false },
       { "value": 16, "exceeded": false },
       { "value": 30, "exceeded": true },
     ]},
   {
-    "assembly": "ImageProcessing", "class": "ImageProcessing.Main", "reportPath": "ImageProcessing_Main.html", "methodName": "System.String ImageProcessing.Main/CLIArguments::Argu.IArgParserTemplate.get_Usage()", "methodShortName": "Argu.IArgParserTemplate.get_Usage()", "fileIndex": 0, "line": 69,
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Cl", "reportPath": "YC.OpenCL.NET_Cl.html", "methodName": "OpenCL.Net.InfoBuffer OpenCL.Net.Cl::GetMemObjectInfo(OpenCL.Net.IMem,OpenCL.Net.MemInfo,OpenCL.Net.ErrorCode&)", "methodShortName": "GetMemObjectInfo(...)", "fileIndex": 2, "line": 155,
+    "metrics": [
+      { "value": 5, "exceeded": false },
+      { "value": 4, "exceeded": false },
+      { "value": 30, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.CLExtensions", "reportPath": "YC.OpenCL.NET_CLExtensions.html", "methodName": "OpenCL.Net.Event OpenCL.Net.Extensions.CLExtensions::EnqueueKernel(OpenCL.Net.CommandQueue,OpenCL.Net.Kernel,System.UInt32,System.UInt32,System.UInt32,System.UInt32,OpenCL.Net.Event[])", "methodShortName": "EnqueueKernel(...)", "fileIndex": 0, "line": 168,
+    "metrics": [
+      { "value": 5, "exceeded": false },
+      { "value": 0, "exceeded": false },
+      { "value": 30, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.CLExtensions", "reportPath": "YC.OpenCL.NET_CLExtensions.html", "methodName": "OpenCL.Net.Event OpenCL.Net.Extensions.CLExtensions::EnqueueWriteToBuffer(OpenCL.Net.CommandQueue,OpenCL.Net.IMem,T[],System.Int32,System.Int64,OpenCL.Net.Event[])", "methodShortName": "EnqueueWriteToBuffer(...)", "fileIndex": 0, "line": 199,
+    "metrics": [
+      { "value": 5, "exceeded": false },
+      { "value": 0, "exceeded": false },
+      { "value": 30, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.CLExtensions", "reportPath": "YC.OpenCL.NET_CLExtensions.html", "methodName": "System.Void OpenCL.Net.Extensions.CLExtensions::WriteToBuffer(OpenCL.Net.CommandQueue,OpenCL.Net.IMem,T[],System.Int32,System.Int64,OpenCL.Net.Event[])", "methodShortName": "WriteToBuffer(...)", "fileIndex": 0, "line": 214,
+    "metrics": [
+      { "value": 5, "exceeded": false },
+      { "value": 0, "exceeded": false },
+      { "value": 30, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.CLExtensions", "reportPath": "YC.OpenCL.NET_CLExtensions.html", "methodName": "OpenCL.Net.Event OpenCL.Net.Extensions.CLExtensions::EnqueueReadFromBuffer(OpenCL.Net.CommandQueue,OpenCL.Net.IMem,T[],System.Int32,System.Int64,OpenCL.Net.Event[])", "methodShortName": "EnqueueReadFromBuffer(...)", "fileIndex": 0, "line": 230,
+    "metrics": [
+      { "value": 5, "exceeded": false },
+      { "value": 0, "exceeded": false },
+      { "value": 30, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.CLExtensions", "reportPath": "YC.OpenCL.NET_CLExtensions.html", "methodName": "System.Void OpenCL.Net.Extensions.CLExtensions::ReadFromBuffer(OpenCL.Net.CommandQueue,OpenCL.Net.IMem,T[],System.Int32,System.Int64,OpenCL.Net.Event[])", "methodShortName": "ReadFromBuffer(...)", "fileIndex": 0, "line": 246,
+    "metrics": [
+      { "value": 5, "exceeded": false },
+      { "value": 0, "exceeded": false },
+      { "value": 30, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.ArraySegment<T>", "reportPath": "YC.OpenCL.NET_ArraySegment_1.html", "methodName": "System.Void OpenCL.Net.ArraySegment`1::.ctor(T[],System.Int32,System.Int32)", "methodShortName": ".ctor(...)", "fileIndex": 0, "line": 707,
     "metrics": [
       { "value": 4, "exceeded": false },
+      { "value": 8, "exceeded": false },
+      { "value": 20, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.ArraySegment<T>", "reportPath": "YC.OpenCL.NET_ArraySegment_1.html", "methodName": "GetEnumerator()", "methodShortName": "GetEnumerator()", "fileIndex": 0, "line": 743,
+    "metrics": [
       { "value": 4, "exceeded": false },
+      { "value": 2, "exceeded": false },
+      { "value": 20, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.CLExtensions", "reportPath": "YC.OpenCL.NET_CLExtensions.html", "methodName": "OpenCL.Net.Kernel OpenCL.Net.Extensions.CLExtensions::_CompileKernel(OpenCL.Net.Context,System.String,System.String,System.String&,System.String)", "methodShortName": "_CompileKernel(...)", "fileIndex": 0, "line": 39,
+    "metrics": [
+      { "value": 4, "exceeded": false },
+      { "value": 2, "exceeded": false },
+      { "value": 20, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.CLExtensions", "reportPath": "YC.OpenCL.NET_CLExtensions.html", "methodName": "OpenCL.Net.Event OpenCL.Net.Extensions.CLExtensions::EnqueueKernel(OpenCL.Net.CommandQueue,OpenCL.Net.Kernel,System.UInt32,System.UInt32,OpenCL.Net.Event[])", "methodShortName": "EnqueueKernel(...)", "fileIndex": 0, "line": 156,
+    "metrics": [
+      { "value": 4, "exceeded": false },
+      { "value": 0, "exceeded": false },
+      { "value": 20, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.Extensions.KernelWrapperBase", "reportPath": "YC.OpenCL.NET_KernelWrapperBase.html", "methodName": "OpenCL.Net.ErrorCode OpenCL.Net.Extensions.KernelWrapperBase::Compile(System.String,System.String,System.String&,System.String)", "methodShortName": "Compile(...)", "fileIndex": 0, "line": 65,
+    "metrics": [
+      { "value": 4, "exceeded": false },
+      { "value": 2, "exceeded": false },
+      { "value": 20, "exceeded": true },
+    ]},
+  {
+    "assembly": "YC.OpenCL.NET", "class": "OpenCL.Net.InfoBuffer", "reportPath": "YC.OpenCL.NET_InfoBuffer.html", "methodName": "CastToEnumerable()", "methodShortName": "CastToEnumerable()", "fileIndex": 0, "line": 933,
+    "metrics": [
+      { "value": 4, "exceeded": false },
+      { "value": 2, "exceeded": false },
       { "value": 20, "exceeded": true },
     ]},
 ];
