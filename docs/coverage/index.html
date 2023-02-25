@@ -14,22 +14,22 @@
 <col />
 </colgroup>
 <tbody>
-<tr><th>Generated on:</th><td>1/12/2023 - 5:42:25 PM</td></tr>
+<tr><th>Generated on:</th><td>25.02.2023 - 23:04:58</td></tr>
 <tr><th>Parser:</th><td>OpenCoverParser</td></tr>
-<tr><th>Assemblies:</th><td>3</td></tr>
-<tr><th>Classes:</th><td>33</td></tr>
-<tr><th>Files:</th><td>11</td></tr>
+<tr><th>Assemblies:</th><td>1</td></tr>
+<tr><th>Classes:</th><td>3</td></tr>
+<tr><th>Files:</th><td>3</td></tr>
 <tr><th>Covered lines:</th><td>0</td></tr>
-<tr><th>Uncovered lines:</th><td>1208</td></tr>
-<tr><th>Coverable lines:</th><td>1208</td></tr>
-<tr><th>Total lines:</th><td>3984</td></tr>
-<tr><th>Line coverage:</th><td>0% (0 of 1208)</td></tr>
+<tr><th>Uncovered lines:</th><td>108</td></tr>
+<tr><th>Coverable lines:</th><td>108</td></tr>
+<tr><th>Total lines:</th><td>201</td></tr>
+<tr><th>Line coverage:</th><td>0% (0 of 108)</td></tr>
 <tr><th>Covered branches:</th><td>0</td></tr>
-<tr><th>Total branches:</th><td>256</td></tr>
-<tr><th>Branch coverage:</th><td>0% (0 of 256)</td></tr>
+<tr><th>Total branches:</th><td>42</td></tr>
+<tr><th>Branch coverage:</th><td>0% (0 of 42)</td></tr>
 <tr><th>Covered methods:</th><td>0</td></tr>
-<tr><th>Total methods:</th><td>315</td></tr>
-<tr><th>Method coverage:</th><td>0% (0 of 315)</td></tr>
+<tr><th>Total methods:</th><td>29</td></tr>
+<tr><th>Method coverage:</th><td>0% (0 of 29)</td></tr>
 </tbody>
 </table>
 <h1>Risk Hotspots</h1>
@@ -52,144 +52,39 @@
 </tr></thead>
 <tbody>
 <tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_Kernel.2.html">OpenCL.Net.Tasks.Kernel</a></td>
-<td title="System.String OpenCL.Net.Tasks.Kernel::TranslateType(System.String,System.Int32)"><a href="YC.OpenCL.NET_Kernel.2.html#file0_line136">TranslateType(...)</a></td><td class="lightred right">68</td>
-<td class="lightred right">1512</td>
-<td class="lightred right">4692</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_Kernel.2.html">OpenCL.Net.Tasks.Kernel</a></td>
-<td title="System.String OpenCL.Net.Tasks.Kernel::ProcessKernelFile(System.String,System.String,System.Boolean,System.String)"><a href="YC.OpenCL.NET_Kernel.2.html#file0_line197">ProcessKernelFile(...)</a></td><td class="lightgreen right">14</td>
-<td class="lightgreen right">192</td>
-<td class="lightred right">210</td>
-</tr>
-<tr>
 <td>ImageProcessing</td>
-<td><a href="ImageProcessing_ImageProcessing.html">ImageProcessing.ImageProcessing</a></td>
-<td title="System.Single ImageProcessing.ImageProcessing/processPixel@174::Invoke(System.Int32,System.Int32)"><a href="ImageProcessing_ImageProcessing.html#file0_line174">Invoke(...)</a></td><td class="lightgreen right">9</td>
+<td><a href="ImageProcessing_CPUImageProcessing.html">CPUImageProcessing</a></td>
+<td title="System.Single CPUImageProcessing/pixelProcessing@79::Invoke(System.Int32,System.Int32)"><a href="ImageProcessing_CPUImageProcessing.html#file0_line79">Invoke(...)</a></td><td class="lightgreen right">9</td>
 <td class="lightgreen right">64</td>
 <td class="lightred right">90</td>
 </tr>
 <tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_Kernel.2.html">OpenCL.Net.Tasks.Kernel</a></td>
-<td title="System.Boolean OpenCL.Net.Tasks.Kernel::Execute()"><a href="YC.OpenCL.NET_Kernel.2.html#file0_line53">Execute()</a></td><td class="lightgreen right">9</td>
-<td class="lightgreen right">16</td>
-<td class="lightred right">90</td>
-</tr>
-<tr>
 <td>ImageProcessing</td>
-<td><a href="ImageProcessing_ImageProcessing.html">ImageProcessing.ImageProcessing</a></td>
-<td title="System.Int32 ImageProcessing.ImageProcessing/Pipe #1 input at line 56@57::GenerateNext(System.Collections.Generic.IEnumerable`1&lt;a&gt;&amp;)"><a href="ImageProcessing_ImageProcessing.html#file0_line57">GenerateNext(...)</a></td><td class="lightgreen right">8</td>
+<td><a href="ImageProcessing_CPUImageProcessing.html">CPUImageProcessing</a></td>
+<td title="System.Int32 CPUImageProcessing/Pipe #1 input at line 47@48::GenerateNext(System.Collections.Generic.IEnumerable`1&lt;a&gt;&amp;)"><a href="ImageProcessing_CPUImageProcessing.html#file0_line48">GenerateNext(...)</a></td><td class="lightgreen right">8</td>
 <td class="lightgreen right">4</td>
 <td class="lightred right">72</td>
 </tr>
 <tr>
 <td>ImageProcessing</td>
-<td><a href="ImageProcessing_Streaming.html">ImageProcessing.Streaming</a></td>
-<td title="System.Void ImageProcessing.Streaming::processAllFiles(System.String,System.String,Microsoft.FSharp.Collections.FSharpList`1&lt;Microsoft.FSharp.Core.FSharpFunc`2&lt;ImageProcessing.ImageProcessing/Image,ImageProcessing.ImageProcessing/Image&gt;&gt;)"><a href="ImageProcessing_Streaming.html#file0_line58">processAllFiles(...)</a></td><td class="lightgreen right">7</td>
+<td><a href="ImageProcessing_Streaming.html">Streaming</a></td>
+<td title="System.Void Streaming::processAllFiles(System.String,System.String,Microsoft.FSharp.Collections.FSharpList`1&lt;Microsoft.FSharp.Core.FSharpFunc`2&lt;CPUImageProcessing/MyImage,CPUImageProcessing/MyImage&gt;&gt;)"><a href="ImageProcessing_Streaming.html#file0_line58">processAllFiles(...)</a></td><td class="lightgreen right">7</td>
 <td class="lightgreen right">8</td>
 <td class="lightred right">56</td>
 </tr>
 <tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_Cl.html">OpenCL.Net.Cl</a></td>
-<td title="System.IntPtr OpenCL.Net.Cl::ImportResolver(System.String,System.Reflection.Assembly,System.Nullable`1&lt;System.Runtime.InteropServices.DllImportSearchPath&gt;)"><a href="YC.OpenCL.NET_Cl.html#file0_line41">ImportResolver(...)</a></td><td class="lightgreen right">7</td>
-<td class="lightgreen right">32</td>
-<td class="lightred right">56</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_Cl.html">OpenCL.Net.Cl</a></td>
-<td title="OpenCL.Net.Context OpenCL.Net.Cl::CreateContext(System.String,OpenCL.Net.DeviceType,OpenCL.Net.ErrorCode&amp;)"><a href="YC.OpenCL.NET_Cl.html#file2_line92">CreateContext(...)</a></td><td class="lightgreen right">7</td>
-<td class="lightgreen right">32</td>
-<td class="lightred right">56</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_KernelWrapperBase.html">OpenCL.Net.Extensions.KernelWrapperBase</a></td>
-<td title="System.UInt32 OpenCL.Net.Extensions.KernelWrapperBase::GetWorkDimension(System.UInt32,System.UInt32,System.UInt32)"><a href="YC.OpenCL.NET_KernelWrapperBase.html#file0_line38">GetWorkDimension(...)</a></td><td class="lightgreen right">7</td>
-<td class="lightgreen right">0</td>
-<td class="lightred right">56</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_CLExtensions.html">OpenCL.Net.Extensions.CLExtensions</a></td>
-<td title="OpenCL.Net.Event OpenCL.Net.Extensions.CLExtensions::EnqueueKernel(OpenCL.Net.CommandQueue,OpenCL.Net.Kernel,System.UInt32,System.UInt32,System.UInt32,System.UInt32,System.UInt32,System.UInt32,OpenCL.Net.Event[])"><a href="YC.OpenCL.NET_CLExtensions.html#file0_line182">EnqueueKernel(...)</a></td><td class="lightgreen right">6</td>
-<td class="lightgreen right">0</td>
-<td class="lightred right">42</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_KernelWrapperBase.html">OpenCL.Net.Extensions.KernelWrapperBase</a></td>
-<td title="System.IntPtr[] OpenCL.Net.Extensions.KernelWrapperBase::GetWorkSizes(System.UInt32,System.UInt32,System.UInt32)"><a href="YC.OpenCL.NET_KernelWrapperBase.html#file0_line43">GetWorkSizes(...)</a></td><td class="lightgreen right">6</td>
-<td class="lightgreen right">0</td>
-<td class="lightred right">42</td>
-</tr>
-<tr>
 <td>ImageProcessing</td>
-<td><a href="ImageProcessing_ImageProcessing.html">ImageProcessing.ImageProcessing</a></td>
-<td title="System.Byte[0...,0...] ImageProcessing.ImageProcessing::loadAs2DArray(System.String)"><a href="ImageProcessing_ImageProcessing.html#file0_line24">loadAs2DArray(...)</a></td><td class="lightgreen right">5</td>
+<td><a href="ImageProcessing_CPUImageProcessing.html">CPUImageProcessing</a></td>
+<td title="System.Byte[0...,0...] CPUImageProcessing::loadAs2DArray(System.String)"><a href="ImageProcessing_CPUImageProcessing.html#file0_line22">loadAs2DArray(...)</a></td><td class="lightgreen right">5</td>
 <td class="lightgreen right">16</td>
 <td class="lightred right">30</td>
 </tr>
 <tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_Cl.html">OpenCL.Net.Cl</a></td>
-<td title="OpenCL.Net.InfoBuffer OpenCL.Net.Cl::GetMemObjectInfo(OpenCL.Net.IMem,OpenCL.Net.MemInfo,OpenCL.Net.ErrorCode&amp;)"><a href="YC.OpenCL.NET_Cl.html#file2_line155">GetMemObjectInfo(...)</a></td><td class="lightgreen right">5</td>
-<td class="lightgreen right">4</td>
+<td>ImageProcessing</td>
+<td><a href="ImageProcessing_CPUImageProcessing.html">CPUImageProcessing</a></td>
+<td title="System.Byte[0...,0...] CPUImageProcessing::rotate2DArray(System.Byte[0...,0...],System.Boolean)"><a href="ImageProcessing_CPUImageProcessing.html#file0_line93">rotate2DArray(...)</a></td><td class="lightgreen right">5</td>
+<td class="lightgreen right">16</td>
 <td class="lightred right">30</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_CLExtensions.html">OpenCL.Net.Extensions.CLExtensions</a></td>
-<td title="OpenCL.Net.Event OpenCL.Net.Extensions.CLExtensions::EnqueueKernel(OpenCL.Net.CommandQueue,OpenCL.Net.Kernel,System.UInt32,System.UInt32,System.UInt32,System.UInt32,OpenCL.Net.Event[])"><a href="YC.OpenCL.NET_CLExtensions.html#file0_line168">EnqueueKernel(...)</a></td><td class="lightgreen right">5</td>
-<td class="lightgreen right">0</td>
-<td class="lightred right">30</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_CLExtensions.html">OpenCL.Net.Extensions.CLExtensions</a></td>
-<td title="OpenCL.Net.Event OpenCL.Net.Extensions.CLExtensions::EnqueueWriteToBuffer(OpenCL.Net.CommandQueue,OpenCL.Net.IMem,T[],System.Int32,System.Int64,OpenCL.Net.Event[])"><a href="YC.OpenCL.NET_CLExtensions.html#file0_line199">EnqueueWriteToBuffer(...)</a></td><td class="lightgreen right">5</td>
-<td class="lightgreen right">0</td>
-<td class="lightred right">30</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_CLExtensions.html">OpenCL.Net.Extensions.CLExtensions</a></td>
-<td title="System.Void OpenCL.Net.Extensions.CLExtensions::WriteToBuffer(OpenCL.Net.CommandQueue,OpenCL.Net.IMem,T[],System.Int32,System.Int64,OpenCL.Net.Event[])"><a href="YC.OpenCL.NET_CLExtensions.html#file0_line214">WriteToBuffer(...)</a></td><td class="lightgreen right">5</td>
-<td class="lightgreen right">0</td>
-<td class="lightred right">30</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_CLExtensions.html">OpenCL.Net.Extensions.CLExtensions</a></td>
-<td title="OpenCL.Net.Event OpenCL.Net.Extensions.CLExtensions::EnqueueReadFromBuffer(OpenCL.Net.CommandQueue,OpenCL.Net.IMem,T[],System.Int32,System.Int64,OpenCL.Net.Event[])"><a href="YC.OpenCL.NET_CLExtensions.html#file0_line230">EnqueueReadFromBuffer(...)</a></td><td class="lightgreen right">5</td>
-<td class="lightgreen right">0</td>
-<td class="lightred right">30</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_CLExtensions.html">OpenCL.Net.Extensions.CLExtensions</a></td>
-<td title="System.Void OpenCL.Net.Extensions.CLExtensions::ReadFromBuffer(OpenCL.Net.CommandQueue,OpenCL.Net.IMem,T[],System.Int32,System.Int64,OpenCL.Net.Event[])"><a href="YC.OpenCL.NET_CLExtensions.html#file0_line246">ReadFromBuffer(...)</a></td><td class="lightgreen right">5</td>
-<td class="lightgreen right">0</td>
-<td class="lightred right">30</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_ArraySegment_1.html">OpenCL.Net.ArraySegment&lt;T&gt;</a></td>
-<td title="System.Void OpenCL.Net.ArraySegment`1::.ctor(T[],System.Int32,System.Int32)"><a href="YC.OpenCL.NET_ArraySegment_1.html#file0_line707">.ctor(...)</a></td><td class="lightgreen right">4</td>
-<td class="lightgreen right">8</td>
-<td class="lightred right">20</td>
-</tr>
-<tr>
-<td>YC.OpenCL.NET</td>
-<td><a href="YC.OpenCL.NET_ArraySegment_1.html">OpenCL.Net.ArraySegment&lt;T&gt;</a></td>
-<td title="GetEnumerator()"><a href="YC.OpenCL.NET_ArraySegment_1.html#file0_line743">GetEnumerator()</a></td><td class="lightgreen right">4</td>
-<td class="lightgreen right">2</td>
-<td class="lightred right">20</td>
 </tr>
 </tbody>
 </table>
@@ -212,46 +107,14 @@
 </colgroup>
 <thead><tr><th>Name</th><th class="right">Covered</th><th class="right">Uncovered</th><th class="right">Coverable</th><th class="right">Total</th><th class="center" colspan="2">Line coverage</th><th class="right">Covered</th><th class="right">Total</th><th class="center" colspan="2">Branch coverage</th></tr></thead>
 <tbody>
-<tr><th>Brahma.FSharp.OpenCL.Shared</th><th class="right">0</th><th class="right">18</th><th class="right">18</th><th class="right">84</th><th title="LineCoverage: 0/18" class="right">0%</th><th><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></th><th class="right">0</th><th class="right">2</th><th class="right" title="0/2">0%</th><th><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></th></tr>
-<tr><td><a href="Brahma.FSharp.OpenCL.Shared_KernelLangExtensions.html">Brahma.FSharp.KernelLangExtensions</a></td><td class="right">0</td><td class="right">1</td><td class="right">1</td><td class="right">42</td><td title="LineCoverage: 0/1" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="Brahma.FSharp.OpenCL.Shared_KernelLangExtensionsModule.html">Brahma.FSharp.KernelLangExtensionsModule</a></td><td class="right">0</td><td class="right">17</td><td class="right">17</td><td class="right">42</td><td title="LineCoverage: 0/17" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">2</td><td class="right" title="0/2">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><th>ImageProcessing</th><th class="right">0</th><th class="right">233</th><th class="right">233</th><th class="right">437</th><th title="LineCoverage: 0/233" class="right">0%</th><th><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></th><th class="right">0</th><th class="right">36</th><th class="right" title="0/36">0%</th><th><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></th></tr>
-<tr><td><a href="ImageProcessing_ImageProcessing.html">ImageProcessing.ImageProcessing</a></td><td class="right">0</td><td class="right">156</td><td class="right">156</td><td class="right">304</td><td title="LineCoverage: 0/156" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">26</td><td class="right" title="0/26">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="ImageProcessing_Main.html">ImageProcessing.Main</a></td><td class="right">0</td><td class="right">23</td><td class="right">23</td><td class="right">53</td><td title="LineCoverage: 0/23" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="ImageProcessing_Streaming.html">ImageProcessing.Streaming</a></td><td class="right">0</td><td class="right">54</td><td class="right">54</td><td class="right">80</td><td title="LineCoverage: 0/54" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">10</td><td class="right" title="0/10">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><th>YC.OpenCL.NET</th><th class="right">0</th><th class="right">957</th><th class="right">957</th><th class="right">22985</th><th title="LineCoverage: 0/957" class="right">0%</th><th><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></th><th class="right">0</th><th class="right">218</th><th class="right" title="0/218">0%</th><th><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></th></tr>
-<tr><td><a href="YC.OpenCL.NET_EmbeddedAttribute.html">Microsoft.CodeAnalysis.EmbeddedAttribute</a></td><td class="right">0</td><td class="right">0</td><td class="right">0</td><td class="right">0</td><td title="MethodCoverage" class="right"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_ArraySegment_1.html">OpenCL.Net.ArraySegment&lt;T&gt;</a></td><td class="right">0</td><td class="right">21</td><td class="right">21</td><td class="right">974</td><td title="LineCoverage: 0/21" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">14</td><td class="right" title="0/14">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Cl.html">OpenCL.Net.Cl</a></td><td class="right">0</td><td class="right">266</td><td class="right">266</td><td class="right">2580</td><td title="LineCoverage: 0/266" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">50</td><td class="right" title="0/50">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_CommandQueue.html">OpenCL.Net.CommandQueue</a></td><td class="right">0</td><td class="right">9</td><td class="right">9</td><td class="right">974</td><td title="LineCoverage: 0/9" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Context.html">OpenCL.Net.Context</a></td><td class="right">0</td><td class="right">10</td><td class="right">10</td><td class="right">974</td><td title="LineCoverage: 0/10" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_ContextProperty.html">OpenCL.Net.ContextProperty</a></td><td class="right">0</td><td class="right">8</td><td class="right">8</td><td class="right">974</td><td title="LineCoverage: 0/8" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Device.html">OpenCL.Net.Device</a></td><td class="right">0</td><td class="right">3</td><td class="right">3</td><td class="right">974</td><td title="LineCoverage: 0/3" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Environment.html">OpenCL.Net.Environment</a></td><td class="right">0</td><td class="right">18</td><td class="right">18</td><td class="right">974</td><td title="LineCoverage: 0/18" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">2</td><td class="right" title="0/2">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Event.html">OpenCL.Net.Event</a></td><td class="right">0</td><td class="right">9</td><td class="right">9</td><td class="right">974</td><td title="LineCoverage: 0/9" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_CLExtensions.html">OpenCL.Net.Extensions.CLExtensions</a></td><td class="right">0</td><td class="right">111</td><td class="right">111</td><td class="right">312</td><td title="LineCoverage: 0/111" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">16</td><td class="right" title="0/16">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_KernelWrapperBase.html">OpenCL.Net.Extensions.KernelWrapperBase</a></td><td class="right">0</td><td class="right">27</td><td class="right">27</td><td class="right">99</td><td title="LineCoverage: 0/27" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">4</td><td class="right" title="0/4">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_ImageFormat.html">OpenCL.Net.ImageFormat</a></td><td class="right">0</td><td class="right">9</td><td class="right">9</td><td class="right">974</td><td title="LineCoverage: 0/9" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_InfoBuffer.html">OpenCL.Net.InfoBuffer</a></td><td class="right">0</td><td class="right">32</td><td class="right">32</td><td class="right">974</td><td title="LineCoverage: 0/32" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">6</td><td class="right" title="0/6">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_InfoBufferArray.html">OpenCL.Net.InfoBufferArray</a></td><td class="right">0</td><td class="right">17</td><td class="right">17</td><td class="right">974</td><td title="LineCoverage: 0/17" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">4</td><td class="right" title="0/4">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_InfoBufferArray_1.html">OpenCL.Net.InfoBufferArray&lt;T&gt;</a></td><td class="right">0</td><td class="right">18</td><td class="right">18</td><td class="right">974</td><td title="LineCoverage: 0/18" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">4</td><td class="right" title="0/4">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Kernel.html">OpenCL.Net.Kernel</a></td><td class="right">0</td><td class="right">9</td><td class="right">9</td><td class="right">974</td><td title="LineCoverage: 0/9" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Mem.html">OpenCL.Net.Mem</a></td><td class="right">0</td><td class="right">10</td><td class="right">10</td><td class="right">974</td><td title="LineCoverage: 0/10" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Mem_1.html">OpenCL.Net.Mem&lt;T&gt;</a></td><td class="right">0</td><td class="right">12</td><td class="right">12</td><td class="right">974</td><td title="LineCoverage: 0/12" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_MemDebugView_1.html">OpenCL.Net.MemDebugView&lt;T&gt;</a></td><td class="right">0</td><td class="right">17</td><td class="right">17</td><td class="right">974</td><td title="LineCoverage: 0/17" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_PinnedObject.html">OpenCL.Net.PinnedObject</a></td><td class="right">0</td><td class="right">7</td><td class="right">7</td><td class="right">974</td><td title="LineCoverage: 0/7" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Platform.html">OpenCL.Net.Platform</a></td><td class="right">0</td><td class="right">3</td><td class="right">3</td><td class="right">974</td><td title="LineCoverage: 0/3" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Program.html">OpenCL.Net.Program</a></td><td class="right">0</td><td class="right">9</td><td class="right">9</td><td class="right">974</td><td title="LineCoverage: 0/9" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Sampler.html">OpenCL.Net.Sampler</a></td><td class="right">0</td><td class="right">9</td><td class="right">9</td><td class="right">974</td><td title="LineCoverage: 0/9" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_Kernel.2.html">OpenCL.Net.Tasks.Kernel</a></td><td class="right">0</td><td class="right">321</td><td class="right">321</td><td class="right">514</td><td title="LineCoverage: 0/321" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">118</td><td class="right" title="0/118">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_TypeSize_1.html">OpenCL.Net.TypeSize&lt;T&gt;</a></td><td class="right">0</td><td class="right">2</td><td class="right">2</td><td class="right">974</td><td title="LineCoverage: 0/2" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_NullableAttribute.html">System.Runtime.CompilerServices.NullableAttribute</a></td><td class="right">0</td><td class="right">0</td><td class="right">0</td><td class="right">0</td><td title="MethodCoverage: 0/0" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_NullableContextAttribute.html">System.Runtime.CompilerServices.NullableContextAttribute</a></td><td class="right">0</td><td class="right">0</td><td class="right">0</td><td class="right">0</td><td title="MethodCoverage: 0/0" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
-<tr><td><a href="YC.OpenCL.NET_RefSafetyRulesAttribute.html">System.Runtime.CompilerServices.RefSafetyRulesAttribute</a></td><td class="right">0</td><td class="right">0</td><td class="right">0</td><td class="right">0</td><td title="MethodCoverage: 0/0" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
+<tr><th>ImageProcessing</th><th class="right">0</th><th class="right">108</th><th class="right">108</th><th class="right">201</th><th title="LineCoverage: 0/108" class="right">0%</th><th><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></th><th class="right">0</th><th class="right">42</th><th class="right" title="0/42">0%</th><th><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></th></tr>
+<tr><td><a href="ImageProcessing_CPUImageProcessing.html">CPUImageProcessing</a></td><td class="right">0</td><td class="right">55</td><td class="right">55</td><td class="right">117</td><td title="LineCoverage: 0/55" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">32</td><td class="right" title="0/32">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
+<tr><td><a href="ImageProcessing_Main.html">ImageProcessing.Main</a></td><td class="right">0</td><td class="right">1</td><td class="right">1</td><td class="right">6</td><td title="LineCoverage: 0/1" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">0</td><td class="right" title="-"></td><td><table class="coverage"><tr><td class="gray covered100">&nbsp;</td></tr></table></td></tr>
+<tr><td><a href="ImageProcessing_Streaming.html">Streaming</a></td><td class="right">0</td><td class="right">52</td><td class="right">52</td><td class="right">78</td><td title="LineCoverage: 0/52" class="right">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td><td class="right">0</td><td class="right">10</td><td class="right" title="0/10">0%</td><td><table class="coverage"><tr><td class="red covered100">&nbsp;</td></tr></table></td></tr>
 </tbody>
 </table>
 </coverage-info>
-<div class="footer">Generated by: ReportGenerator 4.8.13.0<br />1/12/2023 - 5:42:25 PM<br /><a href="https://github.com/danielpalme/ReportGenerator">GitHub</a> | <a href="http://www.palmmedia.de">www.palmmedia.de</a></div></div></div>
+<div class="footer">Generated by: ReportGenerator 4.8.13.0<br />25.02.2023 - 23:04:58<br /><a href="https://github.com/danielpalme/ReportGenerator">GitHub</a> | <a href="http://www.palmmedia.de">www.palmmedia.de</a></div></div></div>
 <script type="text/javascript">
 /* <![CDATA[ */
 (function() {

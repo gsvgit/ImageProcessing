@@ -6,6 +6,8 @@ open ImageProcessing
 module SayTests =
     [<Tests>]
     let tests =
-        testList "samples" [
+        testList
+            "samples"
+            [
 
-        ]
+            ]
