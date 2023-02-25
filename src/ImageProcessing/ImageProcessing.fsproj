@@ -17,7 +17,6 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <None Include="App.config" />
-    <Compile Include="ImageProcessing.fs" />
     <Compile Include="CPUImageProcessing.fs" />
     <Compile Include="Streaming.fs" />
     <Compile Include="Main.fs" />
