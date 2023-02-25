@@ -59,6 +59,15 @@ let edgesKernel =
     array2D [ [ 0; 0; -1; 0; 0 ]; [ 0; 0; -1; 0; 0 ]; [ 0; 0; 2; 0; 0 ]; [ 0; 0; 0; 0; 0 ]; [ 0; 0; 0; 0; 0 ] ]
     |> Array2D.map float32
 
+let darken =
+    array2D [ [ 0; 0; 0 ]; [ 0; 2; 0 ]; [ 0; 0; 0 ] ] |> Array2D.map (fun x -> (float32 x) / 10.0f)
+
+let lighten =
+    array2D [ [ 0; 0; 0 ]; [ 0; 2; 0 ]; [ 0; 0; 0 ] ] |> Array2D.map float32
+
+let sharpen =
+    array2D [ [ 0; -1; 0 ]; [ -1; 5; -1 ]; [ 0; -1; -0 ] ] |> Array2D.map float32
+
 let applyFilterTo2DArray (filter: float32[,]) (image2DArray: byte[,]) =
 
     let height = Array2D.length1 image2DArray
