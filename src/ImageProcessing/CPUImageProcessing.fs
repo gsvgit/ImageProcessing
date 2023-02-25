@@ -88,6 +88,19 @@ let applyFilterTo2DArray (filter: float32[,]) (image2DArray: byte[,]) =
 
     Array2D.mapi (fun x y _ -> byte (pixelProcessing x y)) image2DArray
 
+let rotate2DArray (image2DArray: byte[,]) (isClockwise: bool) =
+
+    let height = Array2D.length1 image2DArray
+    let width = Array2D.length2 image2DArray
+    let buffer = Array2D.zeroCreate width height
+    let weight = Convert.ToInt32 isClockwise
+
+    for j in 0 .. width - 1 do
+        for i in 0 .. height - 1 do
+            buffer[j * weight + (width - 1 - j) * (1 - weight), i * (1 - weight) + (height - 1 - i) * weight] <- image2DArray[i, j]
+
+    buffer
+
 let save2DArrayAsImage (image2DArray: byte[,]) filePath =
 
     let height = Array2D.length1 image2DArray

@@ -1,7 +1,5 @@
 namespace ImageProcessing
 
-open CPUImageProcessing
-
 module Main =
 
     [<EntryPoint>]
