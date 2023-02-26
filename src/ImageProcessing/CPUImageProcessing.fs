@@ -4,19 +4,6 @@ open System
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 
-[<Struct>]
-type MyImage =
-    val Data: array<byte>
-    val Width: int
-    val Height: int
-    val Name: string
-
-    new(data, width, height, name) =
-        { Data = data
-          Width = width
-          Height = height
-          Name = name }
-
 let loadAs2DArray (filePath: string) =
 
     let image = Image.Load<L8> filePath
@@ -31,17 +18,6 @@ let loadAs2DArray (filePath: string) =
     printfn $"H=%A{height} W=%A{width}"
 
     result
-
-let loadAsMyImage (filePath: string) =
-
-    let image = Image.Load<L8> filePath
-    let height = image.Height
-    let width = image.Width
-    let buffer = Array.zeroCreate<byte> (width * height)
-
-    image.CopyPixelDataTo(Span<byte> buffer)
-
-    MyImage(buffer, width, height, System.IO.Path.GetFileName filePath)
 
 let toFlatArray array2D =
     seq {
@@ -109,9 +85,4 @@ let save2DArrayAsImage (image2DArray: byte[,]) filePath =
     printfn $"H=%A{height} W=%A{width}"
 
     let image = Image.LoadPixelData<L8>(toFlatArray image2DArray, width, height)
-    image.Save filePath
-
-let saveMyImageAsImage (image: MyImage) filePath =
-
-    let image = Image.LoadPixelData<L8>(image.Data, image.Width, image.Height)
     image.Save filePath
