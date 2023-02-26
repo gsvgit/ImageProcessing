@@ -88,7 +88,7 @@ let applyFilterTo2DArray (filter: float32[,]) (image2DArray: byte[,]) =
 
     Array2D.mapi (fun x y _ -> byte (pixelProcessing x y)) image2DArray
 
-let rotate2DArray (image2DArray: byte[,]) (isClockwise: bool) =
+let rotate2DArray (isClockwise: bool) (image2DArray: byte[,]) =
 
     let height = Array2D.length1 image2DArray
     let width = Array2D.length2 image2DArray
