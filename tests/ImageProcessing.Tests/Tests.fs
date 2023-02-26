@@ -1,7 +1,7 @@
 namespace ImageProcessing.Tests
 
 open Expecto
-open ImageProcessing
+open CPUImageProcessing
 
 module SayTests =
     [<Tests>]
