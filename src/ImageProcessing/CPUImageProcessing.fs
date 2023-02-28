@@ -81,9 +81,8 @@ let save2DArrayAsImage (image2DArray: byte[,]) filePath =
 
     let height = Array2D.length1 image2DArray
     let width = Array2D.length2 image2DArray
+    let image = Image.LoadPixelData<L8>(toFlatArray image2DArray, width, height)
 
     printfn $"H=%A{height} W=%A{width}"
 
-    let image = Image.LoadPixelData<L8>(toFlatArray image2DArray, width, height)
     image.Save filePath
-

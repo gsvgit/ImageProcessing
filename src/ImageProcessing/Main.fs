@@ -1,41 +1,45 @@
 namespace ImageProcessing
 
+open Argu
+open ArgCommands
+open Helper
 open ImageFolderProcessing
 open CPUImageProcessing
-open ArgCommands
-open Argu
 
 module Main =
 
     [<EntryPoint>]
     let main argv =
-        let parser = ArgumentParser.Create<CliArguments>(programName = "aaa")
+
+        let parser = ArgumentParser.Create<ClIArguments>()
 
         match parser.ParseCommandLine argv with
-            | p when p.Contains(Rotate) ->
-                let input = first <| p.GetResult(Rotate)
-                let output = second <| p.GetResult(Rotate)
-                let clockwise = third <| p.GetResult(Rotate)
+        | res when res.Contains(Rotate) ->
 
-                match System.IO.Path.GetExtension input with
-                | "" ->
-                    processAllFiles input output (rotate2DArray clockwise)
-                | _ ->
-                    let array2D = loadAs2DArray input
-                    let result = rotate2DArray clockwise array2D
-                    save2DArrayAsImage result output
-            | p when p.Contains(Filter) ->
-                let input =  p.GetResult(Filter) |> first
-                let output = p.GetResult(Filter) |> second
-                let kernel = p.GetResult(Filter) |> third |>  kernelParser
+            let tripleResult = res.GetResult(Rotate)
+            let inputPath = first tripleResult
+            let outputPath = second tripleResult
+            let isClockwise = third tripleResult
 
-                match System.IO.Path.GetExtension input with
-                | "" ->
-                    processAllFiles input output (applyFilterTo2DArray kernel)
-                | _ ->
-                    let array2D = loadAs2DArray input
-                    let result = applyFilterTo2DArray kernel array2D
-                    save2DArrayAsImage result output
+            match System.IO.Path.GetExtension inputPath with
+            | "" -> rotate2DArray isClockwise |> processAllFiles inputPath outputPath
             | _ ->
-                printfn "%s" "Error"
+                let array2D = loadAs2DArray inputPath
+                let editedArray2D = rotate2DArray isClockwise array2D
+                save2DArrayAsImage editedArray2D outputPath
+
+        | res when res.Contains(Filter) ->
+            let tripleResult = res.GetResult(Filter)
+            let inputPath = first tripleResult
+            let outputPath = second tripleResult
+            let kernelArray2D = third tripleResult |> kernelParser
+
+            match System.IO.Path.GetExtension inputPath with
+            | "" -> applyFilterTo2DArray kernelArray2D |> processAllFiles inputPath outputPath
+            | _ ->
+                let array2D = loadAs2DArray inputPath
+                let editedArray2D = applyFilterTo2DArray kernelArray2D array2D
+                save2DArrayAsImage editedArray2D outputPath
+        | _ -> printfn $"Unexpected command.\n {parser.PrintUsage()}"
+
         0

@@ -2,7 +2,6 @@ module ImageFolderProcessing
 
 open CPUImageProcessing
 
-
 let listAllImages directory =
 
     let allowableExtensions =

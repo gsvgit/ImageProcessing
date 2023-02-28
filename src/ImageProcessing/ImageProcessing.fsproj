@@ -20,6 +20,7 @@
     <Compile Include="CPUImageProcessing.fs" />
     <Compile Include="ImageFolderProcessing.fs" />
     <Compile Include="ArguCommands.fs" />
+    <Compile Include="Helper.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
