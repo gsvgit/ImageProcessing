@@ -1,33 +1,33 @@
-module ArguCommands
+module ArgCommands
 
 open Argu
-//save
-//load
-//rotate
-//applyFilter
-(*type Editor =
-    | Rotate of bool
-    | GaussFilter
-    | SharpenFilter
-    | LightenFilter
-    | DarkenFilter
-    | EdgesFilter
+open CPUImageProcessing
 
 type Kernel =
     |Gauss
     |Sharpen
     |Lighten
     |Darken
-    |Edges*)
+    |Edges
+
+let kernelParser (kernel : Kernel) =
+    match kernel with
+    |Gauss -> gaussianBlurKernel
+    |Sharpen -> sharpenKernel
+    |Lighten -> lightenKernel
+    |Darken -> darkenKernel
+    |Edges -> edgesKernel
+
 let first (x,_,_) = x
 let second (_,x,_) = x
 let third (_, _, x) = x
 
 type CliArguments =
-    | [<AltCommandLine("-r")>] Rotate of inputPath : string * outputPath : string * clockWise : bool
+    | [<AltCommandLine("-rt")>] Rotate of inputPath : string * outputPath : string * clockWise : bool
+    | [<AltCommandLine("-fl")>] Filter of inputPath : string * outputPath : string * kernel : Kernel
+
     interface IArgParserTemplate with
         member s.Usage =
             match s with
             | Rotate _ -> "rotate image."
-
-// -r /cdjhhsdh /dsjhdsbjs true
+            | Filter _ -> "filter image."
