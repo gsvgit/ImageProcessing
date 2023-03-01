@@ -23,11 +23,12 @@ module Main =
 
         match parser.ParseCommandLine argv with
 
-        | res when res.Contains(Process) && res.Contains(ProcessList)->
-            let tripleResult = res.GetResult(Process)
-            let inputPath = fst tripleResult
-            let outputPath = snd tripleResult
-            let processor = res.GetResult(ProcessList) |> List.map processorParser |> funcComposition
+        | res when res.Contains(Paths) && res.Contains(Process) ->
+
+            let inputPath, outputPath = res.GetResult(Paths)
+
+            let processor =
+                res.GetResult(Process) |> List.map processorParser |> funcComposition
 
             match System.IO.File.Exists inputPath with
             | false -> processor |> processAllFiles inputPath outputPath

@@ -27,4 +27,3 @@ let processAllFiles inputDirectory outputDirectory imageEditor =
         generatePath path |> save2DArrayAsImage editedImage
 
     listAllImages inputDirectory |> List.map imageProcessAndSave |> ignore
-

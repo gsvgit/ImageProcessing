@@ -60,7 +60,6 @@
       <Content Include="Images\input\rory-mckeever-M-d1qoOMHmA-unsplash.jpg" />
       <Content Include="Images\input\yaroslav-beregovyi-g--c9rWAiCY-unsplash.jpg" />
       <Folder Include="Images\output" />
-      <Content Include="Images\expected\ddd.jpg" />
     </ItemGroup>
     <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
