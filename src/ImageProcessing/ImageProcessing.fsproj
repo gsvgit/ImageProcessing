@@ -19,7 +19,7 @@
     <None Include="App.config" />
     <Compile Include="CPUImageProcessing.fs" />
     <Compile Include="ImageFolderProcessing.fs" />
-    <Compile Include="ArguCommands.fs" />
+    <Compile Include="ArgCommands.fs" />
     <Compile Include="Helper.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
