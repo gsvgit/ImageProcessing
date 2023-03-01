@@ -1,5 +1,6 @@
 module ArgCommands
 
+open System.Diagnostics
 open Argu
 open CPUImageProcessing
 
@@ -27,33 +28,31 @@ let rotationParser rotation =
     | Clockwise -> true
     | Counterclockwise -> false
 
-(*type Modifications =
-    | Filter of Kernel * Modifications list
-    | Rotate of Rotation * Modifications
-    | Stop
+type Processor =
+    | Gauss
+    | Sharpen
+    | Lighten
+    | Darken
+    | Edges
+    | Clockwise
+    | Counterclockwise
 
-let modiParser modi=
-    match modi with
-    | Filter (kernel, Stop) -> [kernelParser kernel |> applyFilterTo2DArray]
-    | Rotate rotation -> rotationParser rotation |> rotate2DArray*)
-
-type Modifications =
-    | Filter of Kernel
-    | Rotate of Rotation
-
-let modiParser modi=
-    match modi with
-    | Filter kernel -> kernelParser kernel |> applyFilterTo2DArray
-    | Rotate rotation -> rotationParser rotation |> rotate2DArray
+let processorParser p =
+    match p with
+    | Clockwise -> rotate2DArray true
+    | Counterclockwise -> rotate2DArray false
+    | Gauss -> applyFilterTo2DArray gaussianBlurKernel
+    | Sharpen -> applyFilterTo2DArray sharpenKernel
+    | Lighten -> applyFilterTo2DArray lightenKernel
+    | Darken -> applyFilterTo2DArray darkenKernel
+    | Edges -> applyFilterTo2DArray edgesKernel
 
 type ClIArguments =
-    | [<Unique; AltCommandLine("-rt")>] Rotate of inputPath: string * outputPath: string * rotation: Rotation
-    | [<Unique; AltCommandLine("-fl")>] Filter of inputPath: string * outputPath: string * kernel: Kernel
-    | [< AltCommandLine("-ed")>] Edit of inputPath: string * outputPath: string * modList: list<Modifications>
+    | [< AltCommandLine("-pr")>] Process of inputPath: string * outputPath: string
+    | [<AltCommandLine("-li")>] ProcessList of Processor list
 
     interface IArgParserTemplate with
         member s.Usage =
             match s with
-            | Rotate _ -> "rotate images to the right when parameter is true or to the left when false."
-            | Filter _ -> "set filter to images."
-            | Edit _ -> "edit image using sequence of modifications."
+            | Process _ -> "edit image using sequence of modifications."
+            | ProcessList _ -> "ne visivai"

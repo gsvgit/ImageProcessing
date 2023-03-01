@@ -28,16 +28,3 @@ let processAllFiles inputDirectory outputDirectory imageEditor =
 
     listAllImages inputDirectory |> List.map imageProcessAndSave |> ignore
 
-let processManyModi  (modificationList : list<'value -> 'value>) = //[func1, func2, ...]
-
-    let rec inner list =
-        match list with
-        | [] -> id
-        | [hd] -> hd
-        | hd1 :: hd2 :: tl ->
-            let newList = (hd1 << hd2) :: tl
-            inner newList
-    inner modificationList
-
-    (*let image = loadAs2DArray path
-    modificationList |> List.map (fun n -> n image ) |> ignore*)
