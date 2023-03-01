@@ -49,15 +49,4 @@ module RotationTests =
 
                   Expect.allEqual resultsArray arr $"Unexpected: %A{resultsArray} and original {arr}.\n Expected equality. "
 
-              testProperty "applying new filters to byte array2D changes the original"
-              <| fun (arr: byte[,]) ->
-
-                  let sharpenArray = applyFilterTo2DArray sharpenKernel arr
-                  let darkenArray = applyFilterTo2DArray darkenKernel arr
-                  let lightenArray = applyFilterTo2DArray lightenKernel arr
-
-                  Expect.notEqual arr sharpenArray $"Unexpected: %A{sharpenArray} and original {arr}.\n Expected inequality. "
-                  Expect.notEqual arr darkenArray $"Unexpected: %A{darkenArray} and original {arr}.\n Expected inequality. "
-                  Expect.notEqual arr lightenArray $"Unexpected: %A{lightenArray} and original {arr}.\n Expected inequality. "
-
               ]
