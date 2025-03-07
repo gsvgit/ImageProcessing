@@ -26,18 +26,14 @@ let imgSaver outDir =
                 saveImage img (outFile img.Name)
                 return! loop ()
         }
-
         loop ()
     )
 
 let imgProcessor filterApplicator (imgSaver: MailboxProcessor<_>) =
-
     let filter = filterApplicator
-
     MailboxProcessor.Start(fun inbox ->
         let rec loop cnt = async {
             let! msg = inbox.Receive()
-
             match msg with
             | EOS ch ->
                 printfn "Image processor is ready to finish!"
@@ -50,7 +46,6 @@ let imgProcessor filterApplicator (imgSaver: MailboxProcessor<_>) =
                 imgSaver.Post(Img filtered)
                 return! loop (not cnt)
         }
-
         loop true
     )
 
