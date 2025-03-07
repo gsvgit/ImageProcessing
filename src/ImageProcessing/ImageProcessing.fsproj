@@ -22,7 +22,8 @@
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Remove="SkiaSharp.NativeAssets.Tizen" />
-  </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+    <PackageReference Include="Argu" Version="6.2.5" />
+    <PackageReference Include="Brahma.FSharp" Version="2.0.5" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
+  </ItemGroup>  
 </Project>
