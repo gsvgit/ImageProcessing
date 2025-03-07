@@ -27,8 +27,7 @@ let loadAs2DArray (file: string) =
     for i in 0 .. img.Width - 1 do
         for j in 0 .. img.Height - 1 do
             res.[j, i] <- img.Item(i, j).PackedValue
-
-    printfn $"H=%A{img.Height} W=%A{img.Width}"
+    
     res
 
 let loadAsImage (file: string) =
@@ -46,7 +45,6 @@ let loadAsImage (file: string) =
 let save2DByteArrayAsImage (imageData: byte[,]) file =
     let h = imageData.GetLength 0
     let w = imageData.GetLength 1
-    printfn $"H=%A{h} W=%A{w}"
 
     let flat2Darray array2D =
         seq {
@@ -172,6 +170,7 @@ let applyFilter (filter: float32[][]) (img: byte[,]) =
 
 let applyFilterGPUKernel (clContext: ClContext) localWorkSize =
 
+
     let kernel =
         <@
             fun (r: Range1D) (img: ClArray<_>) imgW imgH (filter: ClArray<_>) filterD (result: ClArray<_>) ->
@@ -226,10 +225,10 @@ let applyFiltersGPU (clContext: ClContext) localWorkSize =
                 allocationMode = AllocationMode.Default
             )
 
-        for filter in filters do
-            let filter = Array.concat filter
+        for _filter in filters do
+            let filter = Array.concat _filter
 
-            let filterD = (Array.length filter) / 2
+            let filterD = (Array.length _filter) / 2
 
             let clFilter =
                 clContext.CreateClArray<_>(filter, HostAccessMode.NotAccessible, DeviceAccessMode.ReadOnly)

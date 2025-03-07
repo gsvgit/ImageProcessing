@@ -46,6 +46,7 @@ module Main =
         match platform with
         | Platforms.CPU -> 
             let mutable image = ImageProcessing.loadAs2DArray inputFile
+            printfn $"Device: CPU"
             let start = System.DateTime.Now
             for filter in filters do
                 image <- ImageProcessing.applyFilter filter image
