@@ -19,6 +19,7 @@
     <None Include="App.config" />
     <Compile Include="ImageProcessing.fs" />
     <Compile Include="Streaming.fs" />
+    <Compile Include="Matrices.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
