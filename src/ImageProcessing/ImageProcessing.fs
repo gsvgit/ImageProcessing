@@ -168,6 +168,36 @@ let applyFilter (filter: float32[][]) (img: byte[,]) =
     Array2D.mapi (fun x y _ -> byte (processPixel x y)) img
 
 
+
+let applyFilterCpuParallel (filter: float32[][]) (img: byte[,]) =
+    let imgH = img.GetLength 0
+    let imgW = img.GetLength 1
+
+    let img = 
+        [| 
+            let height = img.GetLength 0
+            for row in 0..height-1  do
+            yield img.[row,*] 
+        |]
+
+    let filterD = (Array.length filter) / 2
+
+    let filter = Array.concat filter
+
+    let processPixel px py =
+        let dataToHandle = [|
+            for i in px - filterD .. px + filterD do
+                for j in py - filterD .. py + filterD do
+                    if  i < 0 || i >= imgH || j < 0 || j >= imgW
+                    then float32 <| img[px][py]
+                    else float32 <| img[i][j]
+        |]
+
+        Array.fold2 (fun s x y -> s + x * y) 0.0f filter dataToHandle
+
+    Array.Parallel.mapi (fun x a -> Array.mapi (fun y _ -> byte (processPixel x y)) a ) img
+    |> array2D
+
 let applyFilterGPUKernel (clContext: ClContext) localWorkSize =
 
 

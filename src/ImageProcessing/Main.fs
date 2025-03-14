@@ -4,7 +4,7 @@ open Argu
 open Argu.ArguAttributes
 open Brahma.FSharp
 
-type Platforms = CPU = 1 | NVidia = 2 | IntelGPU = 3 | AnyGPU = 4
+type Platforms = CPU = 1 | CPUParallel = 2 | NVidia = 3 | IntelGPU = 4 | AnyGPU = 5
 
 [<CliPrefix(CliPrefix.DoubleDash)>]
 [<NoAppSettings>]
@@ -48,7 +48,7 @@ module Main =
             ImageProcessing.edgesKernel
         ]
 
-        
+(*        
         let applyFiltersOnGPU =
             let device =
                 match platform with 
@@ -64,7 +64,8 @@ module Main =
 
             let context = ClContext(device)
             ImageProcessing.applyFiltersGPU context 64
-(*
+            *)
+
         match platform with
         | Platforms.CPU -> 
             let mutable image = ImageProcessing.loadAs2DArray input
@@ -74,7 +75,16 @@ module Main =
                 image <- ImageProcessing.applyFilter filter image
             printfn $"CPU processing time: {(System.DateTime.Now - start).TotalMilliseconds} ms"
             ImageProcessing.save2DByteArrayAsImage image output
-        | _ ->             
+        | Platforms.CPUParallel -> 
+            let mutable image = ImageProcessing.loadAs2DArray input
+            printfn $"Device: CPU, parallel"
+            let start = System.DateTime.Now
+            for filter in filters do
+                image <- ImageProcessing.applyFilterCpuParallel filter image
+            printfn $"CPU processing time: {(System.DateTime.Now - start).TotalMilliseconds} ms"
+            ImageProcessing.save2DByteArrayAsImage image output
+        
+        (*| _ ->             
             let start = System.DateTime.Now
             let grayscaleImage = ImageProcessing.loadAsImage input
             printfn $"Image reading time: {(System.DateTime.Now - start).TotalMilliseconds} ms"
@@ -84,7 +94,8 @@ module Main =
             printfn $"GPU processing time: {(System.DateTime.Now - start).TotalMilliseconds} ms"            
             printfn $"R: %A{result}"
             ImageProcessing.saveImage result output
-*)
+            *)
+(*
 
         let start = System.DateTime.Now
 
@@ -97,5 +108,5 @@ module Main =
                               - start)
                                  .TotalMilliseconds}"
 
-        
+  *)      
         0
