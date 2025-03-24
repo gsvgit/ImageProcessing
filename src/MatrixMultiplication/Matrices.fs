@@ -2,6 +2,7 @@ module ImageProcessing.Matrices
 
 open Brahma.FSharp
 
+type Kernels = K1 = 1 | K2 = 2
 let rand = new System.Random()
 
 let getRandomMatrix (n: uint) init = 
@@ -21,7 +22,9 @@ let check opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>) (m3:arr
 
 
 let getRandomIntMatrix n= getRandomMatrix n (fun i -> rand.Next(-10,10))
-let getRandomFloatMatrix n= getRandomMatrix n (fun i -> rand.NextDouble())
+let getRandomByteMatrix n= getRandomMatrix n (fun i -> rand.Next() |> byte)
+let getRandomFloat32Matrix n= getRandomMatrix n (fun i -> rand.NextSingle())
+let getRandomOptionIntMatrix n= getRandomMatrix n (fun i -> let x = rand.Next(-10,10) in if x % 3 = 0 then Some x else None)
 
 let multiplyKernel2 (clContext: ClContext) (localWorkSize:uint) opAdd opMult zero =
     let localWorkSize = int localWorkSize
@@ -100,38 +103,40 @@ let multiplyKernel1 (clContext: ClContext) (localWorkSize: uint) opAdd opMult ze
         commandQueue.Post(Msg.CreateRunMsg<_, _> kernel)
         m3
 
-let applyMultiplyGPU<'a,'b,'e,'f> (clContext: ClContext) localWorkSize (opAdd:Quotations.Expr<'a -> 'b -> 'a>) (opMult:Quotations.Expr<'e -> 'f -> 'b>) (zero:'a) =
+let applyMultiplyGPU<'a,'b,'e,'f> (kernel:Kernels) (clContext: ClContext) localWorkSize (opAdd:Quotations.Expr<'a -> 'b -> 'a>) (opMult:Quotations.Expr<'e -> 'f -> 'b>) (zero:'a) =
     //let kernel = multiplyKernel1 clContext localWorkSize opAdd opMult zero
-    let kernel = multiplyKernel2 clContext localWorkSize opAdd opMult zero
+    let kernel = 
+        match kernel with 
+        | Kernels.K1 -> multiplyKernel1 clContext localWorkSize opAdd opMult zero
+        | Kernels.K2 -> multiplyKernel2 clContext localWorkSize opAdd opMult zero
+        | x -> failwithf $"Unexpected kernel {x}."
     let queue = clContext.QueueProvider.CreateQueue()
 
     fun (m1: 'e[][]) (m2: 'f[][]) ->
-        printfn "!!!1!!!"
-
+        
         let m1_gpu =
             clContext.CreateClArray<_>(Array.concat m1, HostAccessMode.NotAccessible)
-        printfn "!!!2!!!"
+        
         let m2_gpu =
             clContext.CreateClArray<_>(Array.concat m2, HostAccessMode.NotAccessible)
-        printfn "!!!3!!!"
-
+        
         let m3_gpu =
             clContext.CreateClArray(
                 m1.Length * m1.Length,
                 HostAccessMode.NotAccessible,
                 allocationMode = AllocationMode.Default
             )
-        printfn "!!!4!!!"
+        
         let x = kernel queue m1_gpu m2_gpu m3_gpu m1.Length
-        printfn "!!!5!!!"
+        
         let result : 'a[] = Array.zeroCreate(m1.Length * m1.Length)
-        printfn "!!!6!!!"
+        
         let result = queue.PostAndReply(fun ch -> Msg.CreateToHostMsg(m3_gpu, result, ch))
-        printfn "!!!7!!!"
+        
         queue.Post(Msg.CreateFreeMsg m1_gpu)
-        printfn "!!!8!!!"
+        
         queue.Post(Msg.CreateFreeMsg m2_gpu)
-        printfn "!!!9!!!"
+        
         queue.Post(Msg.CreateFreeMsg m3_gpu)
-        printfn "!!!10!!!"
+        
         result
