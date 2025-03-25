@@ -6,7 +6,7 @@ open Brahma.FSharp
 open FSharp.Quotations.Evaluator.QuotationEvaluationExtensions
 
 type Platforms = CPU = 1 | CPUParallel = 2 | NVidia = 3 | IntelGPU = 4 | AnyGPU = 5
-type MatrixTypes = MT_byte = 1 | MT_int = 2 | MT_float32 = 3 //| MT_OptInt = 4
+type MatrixTypes = MT_byte = 1 | MT_int = 2 | MT_float32 = 3 | MT_OptInt = 4
 type Semirings = MinPlus = 1 | Arithmetic = 2
 
 [<CliPrefix(CliPrefix.DoubleDash)>]
@@ -32,7 +32,7 @@ type ImageProcessingArguments =
             | MatrixType _ -> "Type of elements of matrices."
             | Semiring _ -> "Semiring to operate with matrices."
 module Main =
-    
+    let z = <@None@>
     [<EntryPoint>]
     let main (argv: string array) =
         let parser = ArgumentParser.Create<ImageProcessingArguments>(programName = "ImageProcessing")
@@ -66,10 +66,10 @@ module Main =
             let mXm, checker  = 
                 match semiring with 
                 | Semirings.Arithmetic -> 
-                    Matrices.applyMultiplyGPU kernel context workGroupSize <@(+)@> <@( * )@> 0uy
+                    Matrices.applyMultiplyGPU kernel context workGroupSize <@(+)@> <@( * )@> <@0uy@>
                     , Matrices.check (+) ( * ) 0uy m1 m2
                 | Semirings.MinPlus -> 
-                    Matrices.applyMultiplyGPU kernel context workGroupSize <@min@> <@(+)@> 255uy
+                    Matrices.applyMultiplyGPU kernel context workGroupSize <@min@> <@(+)@> <@255uy@>
                     , Matrices.check min (+) 255uy m1 m2
                 | x -> failwithf $"Unexpected semiring {x}."
             let start = System.DateTime.Now
@@ -85,10 +85,10 @@ module Main =
             let mXm, checker  = 
                 match semiring with 
                 | Semirings.Arithmetic -> 
-                    Matrices.applyMultiplyGPU kernel context workGroupSize <@(+)@> <@( * )@> 0
+                    Matrices.applyMultiplyGPU kernel context workGroupSize <@(+)@> <@( * )@> <@0@>
                     , Matrices.check (+) ( * ) 0 m1 m2
                 | Semirings.MinPlus -> 
-                    Matrices.applyMultiplyGPU kernel context workGroupSize <@min@> <@(+)@> System.Int32.MaxValue 
+                    Matrices.applyMultiplyGPU kernel context workGroupSize <@min@> <@(+)@> <@System.Int32.MaxValue@>
                     , Matrices.check min (+) System.Int32.MaxValue m1 m2
                 | x -> failwithf $"Unexpected semiring {x}."
 
@@ -99,7 +99,7 @@ module Main =
 
             if check then checker res
 
-       (* | MatrixTypes.MT_OptInt -> 
+        | MatrixTypes.MT_OptInt -> 
             let m1 = Matrices.getRandomOptionIntMatrix matrixSize
             let m2 = Matrices.getRandomOptionIntMatrix matrixSize
             let mXm, checker  = 
@@ -117,11 +117,25 @@ module Main =
                               | Some x, Some y -> Some (x * y)
                               | _ -> None
                               @>
-                    Matrices.applyMultiplyGPU kernel context workGroupSize  opAdd opMult None
+                    Matrices.applyMultiplyGPU kernel context workGroupSize  opAdd opMult z
                     , Matrices.check (opAdd.Compile()) (opMult.Compile()) None m1 m2
-                //| Semirings.MinPlus -> 
-                //    Matrices.applyMultiplyGPU kernel context workGroupSize <@min@> <@(+)@> System.Int32.MaxValue 
-                //    , Matrices.check min (+) System.Int32.MaxValue m1 m2
+                | Semirings.MinPlus -> 
+                    let opAdd =
+                        <@fun a b ->
+                              match a, b with 
+                              | Some x, Some y -> Some (min x y)
+                              | None, Some x
+                              | Some x, None -> Some x
+                              | None, None -> None
+                              @>
+                    let opMult =
+                        <@fun a b -> 
+                              match a, b with 
+                              | Some x, Some y -> Some (x + y)
+                              | _ -> None
+                              @>
+                    Matrices.applyMultiplyGPU kernel context workGroupSize opAdd opMult z 
+                    , Matrices.check (opAdd.Compile()) (opMult.Compile()) None m1 m2
                 | x -> failwithf $"Unexpected semiring {x}."
 
             let start = System.DateTime.Now
@@ -130,17 +144,17 @@ module Main =
             printfn $"GPU processing time: {(System.DateTime.Now - start).TotalMilliseconds} ms"
 
             if check then checker res
-*)
+
         | MatrixTypes.MT_float32 ->
             let m1 = Matrices.getRandomFloat32Matrix matrixSize
             let m2 = Matrices.getRandomFloat32Matrix matrixSize
             let mXm, checker  = 
                 match semiring with 
                 | Semirings.Arithmetic -> 
-                    Matrices.applyMultiplyGPU kernel context workGroupSize <@(+)@> <@( * )@> 0f
+                    Matrices.applyMultiplyGPU kernel context workGroupSize <@(+)@> <@( * )@> <@0f@>
                     , Matrices.check (+) ( * ) 0f m1 m2
                 | Semirings.MinPlus -> 
-                    Matrices.applyMultiplyGPU kernel context workGroupSize <@min@> <@(+)@> System.Single.MaxValue
+                    Matrices.applyMultiplyGPU kernel context workGroupSize <@min@> <@(+)@> <@System.Single.MaxValue@>
                     , Matrices.check min (+) System.Single.PositiveInfinity m1 m2
                 | x -> failwithf $"Unexpected semiring {x}."
 
