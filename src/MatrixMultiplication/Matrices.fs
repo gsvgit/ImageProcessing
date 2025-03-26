@@ -11,15 +11,13 @@ let getRandomMatrix (n: uint) init =
         for i in 0 .. int n - 1 -> Array.init (int n) init
     |]
 
-let check opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>) (m3:array<_>) =
+let cpuMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>) =
     let res = Array.init (m1.Length * m1.Length) (fun _ -> zero)
     for i in 0..m1.Length - 1 do
       for j in 0..m1.Length - 1 do
         for k in 0..m1.Length - 1 do
             res.[i*m1.Length + j] <- opAdd res.[i * m1.Length + j]  (opMult m1.[i].[k] m2.[k].[j])
-
-    Array.iteri2 (fun i r1 r2 -> if r1 <> r2 then printfn $"Expected {r1}, got {r2}") res m3
-
+    res
 
 let cpuParallelMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>) =
     let res = Array.init (m1.Length * m1.Length) (fun _ -> zero)
@@ -30,6 +28,10 @@ let cpuParallelMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>
             res.[i*m1.Length + j] <- opAdd res.[i * m1.Length + j]  (opMult row.[k] m2.[k].[j])
        )
     res
+
+let check opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>) (m3:array<_>) =
+    let res = cpuMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>)
+    Array.iteri2 (fun i r1 r2 -> if r1 <> r2 then printfn $"Expected {r1}, got {r2}") res m3
 
 
 let getRandomIntMatrix n = getRandomMatrix n (fun i -> rand.Next(-10,10))

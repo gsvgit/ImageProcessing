@@ -35,7 +35,8 @@ type ImageProcessingArguments =
             | Semiring _ -> "Semiring to operate with matrices."
 
 module Main =
-    let optZero = <@None@>
+    let optIntZero = <@None@>
+
     [<EntryPoint>]
     let main (argv: string array) =
         let parser = ArgumentParser.Create<ImageProcessingArguments>(programName = "MatrixMultiplication")
@@ -50,18 +51,25 @@ module Main =
         let semiring = results.GetResult(Semiring, defaultValue = Semirings.Arithmetic)
 
 
-        let bench mXm checker m1 m2 =
+        let time mXm checker m1 m2 =
             let start = System.DateTime.Now
             let res = mXm m1 m2
             printfn $"Processing time: {(System.DateTime.Now - start).TotalMilliseconds} ms"
             if check then checker res
 
-        let benchCpu () =
-            let mXm = Matrices.cpuParallelMxM
-            let checker = 1
-            ()
+        let cpuParallelKernel (opAdd:Quotations.Expr<_>) (opMult:Quotations.Expr<_>) zero = 
+            Matrices.cpuParallelMxM 
+                (opAdd.Compile())
+                (opMult.Compile())
+                (FSharp.Quotations.Evaluator.QuotationEvaluator.Evaluate zero)
 
-        let benchGpu () =
+        let cpuKernel (opAdd:Quotations.Expr<_>) (opMult:Quotations.Expr<_>) zero = 
+            Matrices.cpuMxM 
+                (opAdd.Compile())
+                (opMult.Compile())
+                (FSharp.Quotations.Evaluator.QuotationEvaluator.Evaluate zero)
+
+        let gpuKernel opAdd opMult zero =
 
             let device =
                 match platform with 
@@ -78,95 +86,100 @@ module Main =
 
             let context = ClContext(device)
 
-            let inline mXmKernel opAdd opMult zero = Matrices.applyMultiplyGPU kernel context workGroupSize workPerThread opAdd opMult zero
+            Matrices.applyMultiplyGPU kernel context workGroupSize workPerThread opAdd opMult zero
+        
+        let inline mXmKernel opAdd opMult zero = 
+            match platform with 
+            | Platforms.CPUParallel -> cpuParallelKernel opAdd opMult zero
+            | Platforms.CPU         -> cpuKernel opAdd opMult zero
+            | _ -> gpuKernel opAdd opMult zero
+       
+        match matrixType with 
+        | MatrixTypes.MT_byte ->
+            let m1 = Matrices.getRandomByteMatrix matrixSize
+            let m2 = Matrices.getRandomByteMatrix matrixSize
+            let mXm, checker  = 
+                match semiring with 
+                | Semirings.Arithmetic -> 
+                    mXmKernel <@(+)@> <@( * )@> <@0uy@>
+                    , Matrices.check (+) ( * ) 0uy m1 m2
+                | Semirings.MinPlus -> 
+                    mXmKernel <@min@> <@(+)@> <@255uy@>
+                    , Matrices.check min (+) 255uy m1 m2
+                | x -> failwithf $"Unexpected semiring {x}."
             
-            match matrixType with 
-            | MatrixTypes.MT_byte ->
-                let m1 = Matrices.getRandomByteMatrix matrixSize
-                let m2 = Matrices.getRandomByteMatrix matrixSize
-                let mXm, checker  = 
-                    match semiring with 
-                    | Semirings.Arithmetic -> 
-                         mXmKernel <@(+)@> <@( * )@> <@0uy@>
-                        , Matrices.check (+) ( * ) 0uy m1 m2
-                    | Semirings.MinPlus -> 
-                        mXmKernel <@min@> <@(+)@> <@255uy@>
-                        , Matrices.check min (+) 255uy m1 m2
-                    | x -> failwithf $"Unexpected semiring {x}."
-                
-                bench mXm checker m1 m2
+            time mXm checker m1 m2
 
-            | MatrixTypes.MT_int -> 
-                let m1 = Matrices.getRandomIntMatrix matrixSize
-                let m2 = Matrices.getRandomIntMatrix matrixSize
-                let mXm, checker  = 
-                    match semiring with 
-                    | Semirings.Arithmetic -> 
-                        mXmKernel <@(+)@> <@( * )@> <@0@>
-                        , Matrices.check (+) ( * ) 0 m1 m2
-                    | Semirings.MinPlus -> 
-                        mXmKernel <@min@> <@(+)@> <@System.Int32.MaxValue@>
-                        , Matrices.check min (+) System.Int32.MaxValue m1 m2
-                    | x -> failwithf $"Unexpected semiring {x}."
-                
-                bench mXm checker m1 m2
+        | MatrixTypes.MT_int -> 
+            let m1 = Matrices.getRandomIntMatrix matrixSize
+            let m2 = Matrices.getRandomIntMatrix matrixSize
+            let mXm, checker  = 
+                match semiring with 
+                | Semirings.Arithmetic -> 
+                    mXmKernel <@(+)@> <@( * )@> <@0@>
+                    , Matrices.check (+) ( * ) 0 m1 m2
+                | Semirings.MinPlus -> 
+                    mXmKernel <@min@> <@(+)@> <@System.Int32.MaxValue@>
+                    , Matrices.check min (+) System.Int32.MaxValue m1 m2
+                | x -> failwithf $"Unexpected semiring {x}."
+            
+            time mXm checker m1 m2
 
-            | MatrixTypes.MT_OptInt -> 
-                let m1 = Matrices.getRandomOptionIntMatrix matrixSize
-                let m2 = Matrices.getRandomOptionIntMatrix matrixSize
-                let mXm, checker  = 
-                    match semiring with 
-                    | Semirings.Arithmetic -> 
-                        let opAdd =
-                            <@fun a b ->
-                                match a, b with 
-                                | Some x, Some y -> Some (x + y)
-                                | _ -> None
-                                @>
-                        let opMult =
-                            <@fun a b -> 
-                                match a, b with 
-                                | Some x, Some y -> Some (x * y)
-                                | _ -> None
-                                @>
-                        mXmKernel opAdd opMult optZero
-                        , Matrices.check (opAdd.Compile()) (opMult.Compile()) None m1 m2
-                    | Semirings.MinPlus -> 
-                        let opAdd =
-                            <@fun a b ->
-                                match a, b with 
-                                | Some x, Some y -> Some (min x y)
-                                | None, Some x
-                                | Some x, None -> Some x
-                                | None, None -> None
-                                @>
-                        let opMult =
-                            <@fun a b -> 
-                                match a, b with 
-                                | Some x, Some y -> Some (x + y)
-                                | _ -> None
-                                @>
-                        mXmKernel opAdd opMult optZero 
-                        , Matrices.check (opAdd.Compile()) (opMult.Compile()) None m1 m2
-                    | x -> failwithf $"Unexpected semiring {x}."
+        | MatrixTypes.MT_OptInt -> 
+            let m1 = Matrices.getRandomOptionIntMatrix matrixSize
+            let m2 = Matrices.getRandomOptionIntMatrix matrixSize
+            let mXm, checker  = 
+                match semiring with 
+                | Semirings.Arithmetic -> 
+                    let opAdd =
+                        <@fun a b ->
+                            match a, b with 
+                            | Some x, Some y -> Some (x + y)
+                            | _ -> None
+                            @>
+                    let opMult =
+                        <@fun a b -> 
+                            match a, b with 
+                            | Some x, Some y -> Some (x * y)
+                            | _ -> None
+                            @>
+                    mXmKernel opAdd opMult optIntZero
+                    , Matrices.check (opAdd.Compile()) (opMult.Compile()) None m1 m2
+                | Semirings.MinPlus -> 
+                    let opAdd =
+                        <@fun a b ->
+                            match a, b with 
+                            | Some x, Some y -> Some (min x y)
+                            | None, Some x
+                            | Some x, None -> Some x
+                            | None, None -> None
+                            @>
+                    let opMult =
+                        <@fun a b -> 
+                            match a, b with 
+                            | Some x, Some y -> Some (x + y)
+                            | _ -> None
+                            @>
+                    mXmKernel opAdd opMult optIntZero 
+                    , Matrices.check (opAdd.Compile()) (opMult.Compile()) None m1 m2
+                | x -> failwithf $"Unexpected semiring {x}."
 
-                bench mXm checker m1 m2
+            time mXm checker m1 m2
 
-            | MatrixTypes.MT_float32 ->
-                let m1 = Matrices.getRandomFloat32Matrix matrixSize
-                let m2 = Matrices.getRandomFloat32Matrix matrixSize
-                let mXm, checker  = 
-                    match semiring with 
-                    | Semirings.Arithmetic -> 
-                        mXmKernel <@(+)@> <@( * )@> <@0f@>
-                        , Matrices.check (+) ( * ) 0f m1 m2
-                    | Semirings.MinPlus -> 
-                        mXmKernel <@min@> <@(+)@> <@System.Single.MaxValue@>
-                        , Matrices.check min (+) System.Single.PositiveInfinity m1 m2
-                    | x -> failwithf $"Unexpected semiring {x}."
+        | MatrixTypes.MT_float32 ->
+            let m1 = Matrices.getRandomFloat32Matrix matrixSize
+            let m2 = Matrices.getRandomFloat32Matrix matrixSize
+            let mXm, checker  = 
+                match semiring with 
+                | Semirings.Arithmetic -> 
+                    mXmKernel <@(+)@> <@( * )@> <@0f@>
+                    , Matrices.check (+) ( * ) 0f m1 m2
+                | Semirings.MinPlus -> 
+                    mXmKernel <@min@> <@(+)@> <@System.Single.MaxValue@>
+                    , Matrices.check min (+) System.Single.PositiveInfinity m1 m2
+                | x -> failwithf $"Unexpected semiring {x}."
 
-                bench mXm checker m1 m2
+            time mXm checker m1 m2
 
-        benchGpu()
-
+        
         0
