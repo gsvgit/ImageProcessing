@@ -2,7 +2,7 @@ module ImageProcessing.Matrices
 
 open Brahma.FSharp
 
-type Kernels = K0 = 0 | K1 = 1 | K2 = 2 | K3 = 3
+type Kernels = K0 = 0 | K1 = 1 | K2 = 2 | K3 = 3 | K4 = 4
 let rand = new System.Random()
 
 let getRandomMatrix (n: uint) init = 
@@ -23,7 +23,7 @@ let cpuParallelMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>
     let res = Array.init (m1.Length * m1.Length) (fun _ -> zero)
     m1 
     |> Array.Parallel.iteri (fun i row -> 
-        for j in 0..m1.Length - 1 do      
+        for j in 0..m1.Length - 1 do
           for k in 0..m1.Length - 1 do
             res.[i*m1.Length + j] <- opAdd res.[i * m1.Length + j]  (opMult row.[k] m2.[k].[j])
        )
@@ -38,6 +38,74 @@ let getRandomIntMatrix n = getRandomMatrix n (fun i -> rand.Next(-10,10))
 let getRandomByteMatrix n = getRandomMatrix n (fun i -> rand.Next() |> byte)
 let getRandomFloat32Matrix n = getRandomMatrix n (fun i -> rand.NextSingle())
 let getRandomOptionIntMatrix n = getRandomMatrix n (fun i -> let x = rand.Next(-10,10) in if x % 3 = 0 then Some x else None)
+
+let multiplyKernel4 (clContext: ClContext) (localWorkSize:uint) (threadTileSize:uint) opAdd opMult zero =
+    let localWorkSize = int localWorkSize
+    let threadTileSize = int threadTileSize
+    let localBufSize = FSharp.Quotations.Evaluator.QuotationEvaluator.Evaluate <@localWorkSize * localWorkSize@>
+    let threadLocalBufSize = FSharp.Quotations.Evaluator.QuotationEvaluator.Evaluate <@threadTileSize * threadTileSize@>
+    let kernel =
+        <@
+            fun (r: Range2D) (m1: ClArray<_>) (m2: ClArray<_>) (m3: ClArray<_>) n ->
+                let localBaseRow = r.LocalID0 * threadTileSize
+                let localBaseCol = r.LocalID1 * threadTileSize
+                let globalBaseRow = r.GlobalID0 * threadTileSize
+                let globalBaseCol = r.GlobalID1 * threadTileSize
+
+                let m1Submatrix = localArray localBufSize
+                let m2Submatrix = localArray localBufSize
+
+                let m2Buf = threadLocalArray threadTileSize
+
+                let res = threadLocalArray threadLocalBufSize
+
+                for i in 0 .. threadLocalBufSize - 1 do res.[i] <- %zero
+
+                for t in 0 ..  (n / localWorkSize) - 1 do
+                   for i in 0 .. threadTileSize - 1 do
+                      for j in 0 .. threadTileSize - 1 do
+                        let tiledRow = localWorkSize * t + localBaseRow + i
+                        let tiledCol = localWorkSize * t + localBaseCol + j
+                        let targetElem =  (localBaseRow + i) * localWorkSize + localBaseCol + j
+                        m1Submatrix[targetElem] <- m1[(globalBaseRow + i) * n + tiledCol]
+                        m2Submatrix[targetElem] <- m2[tiledRow * n + globalBaseCol + j]
+
+                   barrierLocal()
+
+                   for k in 0 .. localWorkSize - 1 do
+                       
+                       for i in 0 .. threadTileSize - 1 do
+                          m2Buf[i] <- m2Submatrix[k * localWorkSize + localBaseCol + i]
+
+                       for i in 0 .. threadTileSize - 1 do
+                          let m1Val = m1Submatrix[(localBaseRow + i) * localWorkSize + k]
+                          for j in 0 .. threadTileSize - 1 do
+                             let x = (%opMult) m1Val m2Buf[j]
+                             let y = (%opAdd) res[i * threadTileSize + j] x 
+                             res[i * threadTileSize + j] <- y
+                   barrierLocal()
+
+                for i in 0 .. threadTileSize - 1 do  
+                    for j in 0 .. threadTileSize - 1 do  
+                        m3.[(globalBaseRow + i) * n + globalBaseCol + j] <- res[i * threadTileSize + j]
+        @>
+
+    let kernel = clContext.Compile kernel
+
+    fun (commandQueue: MailboxProcessor<_>) (m1: ClArray<_>) (m2: ClArray<_>) (m3: ClArray<_>) n  ->
+
+        let ndRange =
+            Range2D(
+                n / threadTileSize,
+                n / threadTileSize,
+                localWorkSize / threadTileSize,
+                localWorkSize / threadTileSize
+            )
+
+        let kernel = kernel.GetKernel()
+        commandQueue.Post(Msg.MsgSetArguments(fun () -> kernel.KernelFunc ndRange m1 m2 m3 n))
+        commandQueue.Post(Msg.CreateRunMsg<_, _> kernel)
+        m3
 
 let multiplyKernel3 (clContext: ClContext) (localWorkSize:uint) (workPerThread:uint) opAdd opMult zero =
     let localWorkSize = int localWorkSize
@@ -209,6 +277,7 @@ let applyMultiplyGPU<'a,'b,'e,'f> (kernel:Kernels) (clContext: ClContext) localW
         | Kernels.K1 -> multiplyKernel1 clContext localWorkSize opAdd opMult zero
         | Kernels.K2 -> multiplyKernel2 clContext localWorkSize opAdd opMult zero
         | Kernels.K3 -> multiplyKernel3 clContext localWorkSize workPerThread opAdd opMult zero
+        | Kernels.K4 -> multiplyKernel4 clContext localWorkSize workPerThread opAdd opMult zero
         | x -> failwithf $"Unexpected kernel {x}."
     let queue = clContext.QueueProvider.CreateQueue()
 
