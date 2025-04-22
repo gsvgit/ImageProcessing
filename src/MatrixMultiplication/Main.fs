@@ -5,8 +5,8 @@ open Argu.ArguAttributes
 open Brahma.FSharp
 open FSharp.Quotations.Evaluator.QuotationEvaluationExtensions
 
-type Platforms = CPU = 1 | CPUParallel = 2 | NVidia = 3 | IntelGPU = 4 | AnyGPU = 5
-type MatrixTypes = MT_byte = 1 | MT_int = 2 | MT_float32 = 3 | MT_OptInt = 4
+type Platforms = CPU = 1 | CPUParallel = 2 | NVidia = 3 | IntelGPU = 4 | AnyGPU = 5 | PoclCPU = 6
+type MatrixTypes = MT_byte = 1 | MT_int = 2 | MT_float32 = 3 | MT_OptInt = 4 | MT_float64 = 5
 type Semirings = MinPlus = 1 | Arithmetic = 2
 
 [<CliPrefix(CliPrefix.DoubleDash)>]
@@ -20,6 +20,8 @@ type ImageProcessingArguments =
     | Check of bool
     | MatrixType of MatrixTypes 
     | Semiring of Semirings
+    | NumToRun of uint
+    | Tune of bool
 
     with
     interface IArgParserTemplate with
@@ -33,6 +35,8 @@ type ImageProcessingArguments =
             | Check _ -> "Whether check result correctness."
             | MatrixType _ -> "Type of elements of matrices."
             | Semiring _ -> "Semiring to operate with matrices."
+            | NumToRun _ -> "How many times run the kernel specified."
+            | Tune _ -> "Run parameters tuning, not benchmarks."
 
 module Main =
     let optIntZero = <@None@>
@@ -49,11 +53,13 @@ module Main =
         let check = results.GetResult(Check, defaultValue = false)
         let matrixType = results.GetResult(MatrixType, defaultValue = MatrixTypes.MT_int)
         let semiring = results.GetResult(Semiring, defaultValue = Semirings.Arithmetic)
+        let numToRun = results.GetResult(NumToRun, defaultValue = 1u)
+        let tune = results.GetResult(Tune, defaultValue = false)
 
 
         let time mXm checker m1 m2 =
             let start = System.DateTime.Now
-            let res = mXm m1 m2
+            let res,_ = mXm m1 m2
             printfn $"Processing time: {(System.DateTime.Now - start).TotalMilliseconds} ms"
             if check then checker res
 
@@ -79,6 +85,7 @@ module Main =
                         match platform with 
                         | Platforms.NVidia -> Platform.Nvidia
                         | Platforms.IntelGPU -> Platform.Intel
+                        | Platforms.PoclCPU -> Platform.Custom "Portable*"
                     ClDevice.GetAvailableDevices(platform = platform)
                     |> Seq.head
 
@@ -86,7 +93,9 @@ module Main =
 
             let context = ClContext(device)
 
-            Matrices.applyMultiplyGPU kernel context workGroupSize workPerThread opAdd opMult zero
+            if tune 
+            then ImageProcessing.Tuner.tune kernel context numToRun opAdd opMult zero
+            else Matrices.applyMultiplyGPU kernel context numToRun workGroupSize workPerThread opAdd opMult zero
         
         let inline mXmKernel opAdd opMult zero = 
             match platform with 
@@ -178,6 +187,21 @@ module Main =
                     mXmKernel <@min@> <@(+)@> <@System.Single.MaxValue@>
                     , Matrices.check min (+) System.Single.PositiveInfinity m1 m2
                 | x -> failwithf $"Unexpected semiring {x}."
+
+            time mXm checker m1 m2
+
+        | MatrixTypes.MT_float64 ->
+            let m1 = Matrices.getRandomFloat64Matrix matrixSize
+            let m2 = Matrices.getRandomFloat64Matrix matrixSize
+            let mXm, checker  = 
+                match semiring with 
+                | Semirings.Arithmetic -> 
+                    mXmKernel <@(+)@> <@( * )@> <@0.0@>
+                    , Matrices.check (+) ( * ) 0.0 m1 m2
+                | Semirings.MinPlus -> 
+                    mXmKernel <@min@> <@(+)@> <@System.Double.MaxValue@>
+                    , Matrices.check min (+) System.Double.PositiveInfinity m1 m2
+                | x -> failwithf $"Unexpected semiring {x}."      
 
             time mXm checker m1 m2
 

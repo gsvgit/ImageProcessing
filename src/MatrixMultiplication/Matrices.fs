@@ -17,7 +17,7 @@ let cpuMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>) =
       for j in 0..m1.Length - 1 do
         for k in 0..m1.Length - 1 do
             res.[i*m1.Length + j] <- opAdd res.[i * m1.Length + j]  (opMult m1.[i].[k] m2.[k].[j])
-    res
+    res, 0.0
 
 let cpuParallelMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>) =
     let res = Array.init (m1.Length * m1.Length) (fun _ -> zero)
@@ -27,16 +27,17 @@ let cpuParallelMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>
           for k in 0..m1.Length - 1 do
             res.[i*m1.Length + j] <- opAdd res.[i * m1.Length + j]  (opMult row.[k] m2.[k].[j])
        )
-    res
+    res, 0.0
 
 let check opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>) (m3:array<_>) =
-    let res = cpuMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>)
+    let res,_ = cpuMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>)
     Array.iteri2 (fun i r1 r2 -> if r1 <> r2 then printfn $"Expected {r1}, got {r2}") res m3
 
 
 let getRandomIntMatrix n = getRandomMatrix n (fun i -> rand.Next(-10,10))
 let getRandomByteMatrix n = getRandomMatrix n (fun i -> rand.Next() |> byte)
 let getRandomFloat32Matrix n = getRandomMatrix n (fun i -> rand.NextSingle())
+let getRandomFloat64Matrix n = getRandomMatrix n (fun i -> rand.NextDouble())
 let getRandomOptionIntMatrix n = getRandomMatrix n (fun i -> let x = rand.Next(-10,10) in if x % 3 = 0 then Some x else None)
 
 let multiplyKernel4 (clContext: ClContext) (localWorkSize:uint) (threadTileSize:uint) opAdd opMult zero =
@@ -270,7 +271,7 @@ let multiplyKernel0 (clContext: ClContext) (localWorkSize: uint) opAdd opMult ze
         commandQueue.Post(Msg.CreateRunMsg<_, _> kernel)
         m3
 
-let applyMultiplyGPU<'a,'b,'e,'f> (kernel:Kernels) (clContext: ClContext) localWorkSize workPerThread (opAdd:Quotations.Expr<'a -> 'b -> 'a>) (opMult:Quotations.Expr<'e -> 'f -> 'b>) (zero:Quotations.Expr<'a>) =    
+let applyMultiplyGPU<'a,'b,'e,'f> (kernel:Kernels) (clContext: ClContext) (numToRun:uint) localWorkSize workPerThread (opAdd:Quotations.Expr<'a -> 'b -> 'a>) (opMult:Quotations.Expr<'e -> 'f -> 'b>) (zero:Quotations.Expr<'a>) =    
     let kernel = 
         match kernel with 
         | Kernels.K0 -> multiplyKernel0 clContext localWorkSize opAdd opMult zero
@@ -280,34 +281,38 @@ let applyMultiplyGPU<'a,'b,'e,'f> (kernel:Kernels) (clContext: ClContext) localW
         | Kernels.K4 -> multiplyKernel4 clContext localWorkSize workPerThread opAdd opMult zero
         | x -> failwithf $"Unexpected kernel {x}."
     let queue = clContext.QueueProvider.CreateQueue()
+    //queue.Error.Add(fun x -> printfn "%A" x)
+    let numToRun = int numToRun
 
     fun (m1: 'e[][]) (m2: 'f[][]) ->
-        
-        let m1_gpu =
-            clContext.CreateClArray<_>(Array.concat m1, HostAccessMode.NotAccessible)
-        
-        let m2_gpu =
-            clContext.CreateClArray<_>(Array.concat m2, HostAccessMode.NotAccessible)
-        
-        let m3_gpu =
-            clContext.CreateClArray(
-                m1.Length * m1.Length,
-                HostAccessMode.NotAccessible,
-                deviceAccessMode=DeviceAccessMode.WriteOnly,
-                allocationMode = AllocationMode.Default
-            )
-        
-        let x = kernel queue m1_gpu m2_gpu m3_gpu m1.Length
-        
+        let start = System.DateTime.Now
         let result : 'a[] = Array.zeroCreate(m1.Length * m1.Length)
+        for i in 0 .. numToRun - 1 do
+            let m1_gpu =
+                clContext.CreateClArray<_>(Array.concat m1, HostAccessMode.NotAccessible)
+            
+            let m2_gpu =
+                clContext.CreateClArray<_>(Array.concat m2, HostAccessMode.NotAccessible)
+            
+            let m3_gpu =
+                clContext.CreateClArray(
+                    m1.Length * m1.Length,
+                    HostAccessMode.NotAccessible,
+                    deviceAccessMode=DeviceAccessMode.WriteOnly,
+                    allocationMode = AllocationMode.Default
+                )
+            
+            let x = kernel queue m1_gpu m2_gpu m3_gpu m1.Length
+            
+            let result = queue.PostAndReply(fun ch -> Msg.CreateToHostMsg(m3_gpu, result, ch))
+            
+            queue.Post(Msg.CreateFreeMsg m1_gpu)
+            
+            queue.Post(Msg.CreateFreeMsg m2_gpu)
+            
+            queue.Post(Msg.CreateFreeMsg m3_gpu)
+
+        let totalTime = (System.DateTime.Now - start).TotalMilliseconds
         
-        let result = queue.PostAndReply(fun ch -> Msg.CreateToHostMsg(m3_gpu, result, ch))
-        
-        queue.Post(Msg.CreateFreeMsg m1_gpu)
-        
-        queue.Post(Msg.CreateFreeMsg m2_gpu)
-        
-        queue.Post(Msg.CreateFreeMsg m3_gpu)
-        
-        result
+        result, (totalTime / (float numToRun))
         
