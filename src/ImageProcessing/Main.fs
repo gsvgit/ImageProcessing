@@ -4,7 +4,7 @@ open Argu
 open Argu.ArguAttributes
 open Brahma.FSharp
 
-type Platforms = CPU = 1 | CPUParallel = 2 | NVidia = 3 | IntelGPU = 4 | AnyGPU = 5
+type Platforms = CPU = 1 | CPUParallel = 2 | Nvidia = 3 | IntelGPU = 4 | AnyGPU = 5
 
 [<CliPrefix(CliPrefix.DoubleDash)>]
 [<NoAppSettings>]
@@ -13,7 +13,7 @@ type ImageProcessingArguments =
     | Output of string
     | Platform of Platforms
     | WorkGroupSize of uint
-    | MatrixSize of uint    
+    | Stream of list<Platforms>
     with
     interface IArgParserTemplate with
         member arg.Usage =
@@ -22,7 +22,8 @@ type ImageProcessingArguments =
             | Output _ -> "File to store result."
             | Platform _ -> "Where to run."
             | WorkGroupSize _ -> "Work group size."
-            | MatrixSize _ -> "Number of columns (or rows). We use square matrices."
+            | Stream _ -> "Folder processing on multiple devices."
+
 module Main =
     //let pathToExamples = "/home/gsv/Projects/TestProj2020/src/ImgProcessing/Examples"
     //let inputFolder = System.IO.Path.Combine(pathToExamples, "input")
@@ -40,32 +41,45 @@ module Main =
         let output = results.GetResult(Output, defaultValue = "out.jpg")
         let platform = results.GetResult(Platform, defaultValue = Platforms.CPU)
         let workGroupSize = results.GetResult(WorkGroupSize, defaultValue = 64u)
-        let matrixSize = results.GetResult(MatrixSize, defaultValue = 512u)
+        let devicesForStream = results.GetResult(Stream, defaultValue = [])
 
         let filters = [
+            ImageProcessing.gaussianBlurKernel
+            ImageProcessing.gaussianBlurKernel
             ImageProcessing.gaussianBlurKernel
             ImageProcessing.gaussianBlurKernel
             ImageProcessing.edgesKernel
         ]
 
-(*        
-        let applyFiltersOnGPU =
+        
+        let applyFiltersOnGPU platform =
             let device =
                 match platform with 
                 | Platforms.AnyGPU -> ClDevice.GetFirstAppropriateDevice()
                 | _ -> 
                     let platform =
                         match platform with 
-                        | Platforms.NVidia -> Platform.Nvidia
+                        | Platforms.Nvidia -> Platform.Nvidia
                         | Platforms.IntelGPU -> Platform.Intel
                     ClDevice.GetAvailableDevices(platform = platform)
                     |> Seq.head
             printfn $"Device: %A{device.Name}"
 
-            let context = ClContext(device)
+            let context = ClContext device
             ImageProcessing.applyFiltersGPU context 64
-            *)
 
+        match devicesForStream with 
+        | hd :: tl ->           
+          let appliers = List.map applyFiltersOnGPU devicesForStream |> List.map (fun f -> f filters)
+          let imagesToProcess = 
+            Streaming.listAllFiles input
+            |> List.map (fun file -> Streaming.Img(ImageProcessing.loadAsImage file))
+          let start = System.DateTime.Now
+          Streaming.processAllLoadedFiles imagesToProcess appliers
+          //Streaming.processAllFiles input output appliers
+          printfn  $"TotalTime = %f{(System.DateTime.Now - start).TotalMilliseconds}"
+
+        (*
         match platform with
         | Platforms.CPU -> 
             let mutable image = ImageProcessing.loadAs2DArray input
@@ -83,7 +97,7 @@ module Main =
                 image <- ImageProcessing.applyFilterCpuParallel filter image
             printfn $"CPU processing time: {(System.DateTime.Now - start).TotalMilliseconds} ms"
             ImageProcessing.save2DByteArrayAsImage image output
-        
+        *)
         (*| _ ->             
             let start = System.DateTime.Now
             let grayscaleImage = ImageProcessing.loadAsImage input

@@ -10,9 +10,8 @@ type msg =
     | Img of Image
     | EOS of AsyncReplyChannel<unit>
 
-let imgSaver outDir =
-    let outFile (imgName: string) = System.IO.Path.Combine(outDir, imgName)
-
+let imgSaver saveImage =
+    
     MailboxProcessor.Start(fun inbox ->
         let rec loop () = async {
             let! msg = inbox.Receive()
@@ -23,11 +22,12 @@ let imgSaver outDir =
                 ch.Reply()
             | Img img ->
                 printfn $"Save: %A{img.Name}"
-                saveImage img (outFile img.Name)
+                saveImage img
                 return! loop ()
         }
         loop ()
     )
+
 
 let imgProcessor filterApplicator (imgSaver: MailboxProcessor<_>) =
     let filter = filterApplicator
@@ -50,26 +50,62 @@ let imgProcessor filterApplicator (imgSaver: MailboxProcessor<_>) =
     )
 
 let processAllFiles inDir outDir filterApplicators =
+
     let mutable cnt = 0
+
+    let outFile (imgName: string) = System.IO.Path.Combine(outDir, imgName)
+
+    let saveImageToDir (img:Image) = saveImage img (outFile img.Name)
 
     let imgProcessors =
         filterApplicators
         |> List.map (fun x ->
-            let imgSaver = imgSaver outDir
+            let imgSaver = imgSaver saveImageToDir
             imgProcessor x imgSaver
         )
         |> Array.ofList
 
     let filesToProcess = listAllFiles inDir
 
+    while cnt < List.length filesToProcess do
+        let p = (imgProcessors |> Array.minBy (fun p -> p.CurrentQueueLength))
+        if p.CurrentQueueLength < 3 
+        then 
+           p.Post (Img(loadAsImage (filesToProcess[cnt])))
+           cnt <- cnt + 1
+
+(*
     for file in filesToProcess do
-        //while (imgProcessors |> Array.minBy (fun p -> p.CurrentQueueLength)).CurrentQueueLength > 3 do ()
         (imgProcessors
          |> Array.minBy (fun p -> p.CurrentQueueLength))
             .Post(Img(loadAsImage file))
-
-        cnt <- cnt + 1
+*)
 
     for imgProcessor in imgProcessors do
         imgProcessor.PostAndReply EOS
-//imgSaver.PostAndReply EOS
+
+
+let processAllLoadedFiles inImages filterApplicators =    
+    let result = new ResizeArray<_>()
+
+    let mutable cnt = 0
+
+    let saveImageToArr (img:Image) = result.Add img
+
+    let imgProcessors =
+        filterApplicators
+        |> List.map (fun x ->
+            let imgSaver = imgSaver saveImageToArr
+            imgProcessor x imgSaver
+        )
+        |> Array.ofList
+    
+    while cnt < List.length inImages do
+        let p = (imgProcessors |> Array.minBy (fun p -> p.CurrentQueueLength))
+        if p.CurrentQueueLength < 3 
+        then 
+           p.Post inImages[cnt]
+           cnt <- cnt + 1
+
+    for imgProcessor in imgProcessors do
+        imgProcessor.PostAndReply EOS

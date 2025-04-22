@@ -167,8 +167,6 @@ let applyFilter (filter: float32[][]) (img: byte[,]) =
 
     Array2D.mapi (fun x y _ -> byte (processPixel x y)) img
 
-
-
 let applyFilterCpuParallel (filter: float32[][]) (img: byte[,]) =
     let imgH = img.GetLength 0
     let imgW = img.GetLength 1
