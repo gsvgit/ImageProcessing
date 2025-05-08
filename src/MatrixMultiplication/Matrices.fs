@@ -6,10 +6,7 @@ type Kernels = K0 = 0 | K1 = 1 | K2 = 2 | K3 = 3 | K4 = 4
 let rand = new System.Random()
 
 let getRandomMatrix (n: uint) init = 
-    
-    [|
-        for i in 0 .. int n - 1 -> Array.init (int n) init
-    |]
+    Array.Parallel.init (int n) (fun i -> Array.init (int n) init) 
 
 let cpuMxM opAdd opMult zero (m1 : array<array<_>>) (m2: array<array<_>>) =
     let res = Array.init (m1.Length * m1.Length) (fun _ -> zero)
@@ -280,13 +277,14 @@ let applyMultiplyGPU<'a,'b,'e,'f> (kernel:Kernels) (clContext: ClContext) (numTo
         | Kernels.K3 -> multiplyKernel3 clContext localWorkSize workPerThread opAdd opMult zero
         | Kernels.K4 -> multiplyKernel4 clContext localWorkSize workPerThread opAdd opMult zero
         | x -> failwithf $"Unexpected kernel {x}."
+    
     let queue = clContext.QueueProvider.CreateQueue()
-    //queue.Error.Add(fun x -> printfn "%A" x)
+    
     let numToRun = int numToRun
 
     fun (m1: 'e[][]) (m2: 'f[][]) ->
-        let start = System.DateTime.Now
         let result : 'a[] = Array.zeroCreate(m1.Length * m1.Length)
+        let start = System.DateTime.Now
         for i in 0 .. numToRun - 1 do
             let m1_gpu =
                 clContext.CreateClArray<_>(Array.concat m1, HostAccessMode.NotAccessible)
