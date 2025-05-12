@@ -30,7 +30,8 @@ for kernel in kernels:
                     output = subprocess.check_output([cmd],shell=True)
                     output = output.decode("utf-8")
                     if 'Processing time:' in output:
-                        time = float(output.split()[-2])
+                        line = [x for x in output.split('\n') if 'Processing time:' in x][0]
+                        time = float(line.split()[-2])
                         res.append([wgs, wpt, time])
                         print (f'wgs={wgs}, wpt={wpt}, time={time}')
                 except BaseException: ()
