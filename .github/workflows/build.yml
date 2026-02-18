@@ -24,11 +24,11 @@ jobs:
 
     
     - name: Setup POCL and clinfo 
-      if: runner.os == "Linux"    
+      if: runner.os == 'Linux'    
       run: |
         sudo apt-get update
         sudo apt-get install -y pocl-opencl-icd clinfo
     
     - name: Check OpenCL
-      if: runner.os == "Linux"    
+      if: runner.os == 'Linux'    
       run: clinfo
