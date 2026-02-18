@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:  
 
-  build:
+  build-and-test:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
@@ -19,19 +19,10 @@ jobs:
     - name: Build
       run: dotnet build -c Release
 
-  test_cpu:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-    needs: build
-    runs-on: ${{ matrix.os }}
-    steps:
-    - name: Run tests
+    - name: Run tests on CPU
       run: dotnet test
 
-  test_pocl:
-    needs: test_cpu
-    runs-on: ubuntu_latest
+    if: runner.os == "Linux"
     steps:
     - name: Setup POCL and clinfo 
       run: |
