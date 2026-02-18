@@ -22,12 +22,13 @@ jobs:
     - name: Run tests on CPU
       run: dotnet test
 
-    if: runner.os == "Linux"
-    steps:
+    
     - name: Setup POCL and clinfo 
+      if: runner.os == "Linux"    
       run: |
-         sudo apt-get update
-         sudo apt-get install -y pocl-opencl-icd clinfo
+        sudo apt-get update
+        sudo apt-get install -y pocl-opencl-icd clinfo
     
     - name: Check OpenCL
+      if: runner.os == "Linux"    
       run: clinfo
