@@ -20,15 +20,19 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run tests on CPU
-      run: dotnet test
+      run: dotnet test --filter Category=CPU_Tests
 
     
     - name: Setup POCL and clinfo 
-      if: runner.os == 'Linux'    
+      if: runner.os == 'Linux'
       run: |
         sudo apt-get update
         sudo apt-get install -y pocl-opencl-icd clinfo
     
     - name: Check OpenCL
-      if: runner.os == 'Linux'    
+      if: runner.os == 'Linux'
       run: clinfo
+
+    - name: Run tests on GPU (with POCL)
+      if: runner.os == 'Linux'
+      run: dotnet test --filter Category=GPU_Tests
