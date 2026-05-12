@@ -18,7 +18,17 @@ Few example how to utilize GPGPU in F# code using [Brahma.FSharp](https://github
 This project currently includes two classic GPGPU examples:
 
 1.  **Image Convolution**: Applies various filters (like blur, sharpen, edge detection) to images. This operation is inherently parallel, as each output pixel can be computed independently from its neighbors, making it an ideal candidate for GPU acceleration. (Located in [`src/ImageProcessing/`](src/ImageProcessing)).
-2.  **Matrix Multiplication**: Implements the multiplication of two large matrices on the GPU. This is a fundamental operation in many scientific and engineering domains and perfectly illustrates data-parallel computing. (Located in [`src/MatrixMultiplication/`](src/MatrixMultiplication) ).
+2.  **Matrix Multiplication**: Implements the multiplication of two large matrices on the GPU. This is a fundamental operation in many scientific and engineering domains and perfectly illustrates data-parallel computing. (Located in [`src/MatrixMultiplication/`](src/MatrixMultiplication) ). Inspired by [Cedric Nugteren's OpenCL SGEMM tutorial](https://cnugteren.github.io/tutorial/pages/page1.html).
+
+    Implemented kernels (K0–K4), each building on the previous with progressive optimizations:
+
+    | Kernel | Description |
+    |---|---|
+    | **K0** | Naive: each thread computes one output element, adding each pairwise product directly to the global memory cell of the result matrix |
+    | **K1** | Local accumulator: each thread computes one output element using a mutable local register before writing to global memory once |
+    | **K2** | Local memory tiling: tiles of both input matrices are loaded into local memory for reuse, each thread computes one output element |
+    | **K3** | Increased work per thread: each thread computes `WPT` output elements from tiles in local memory |
+    | **K4** | 2D register blocking: each thread computes a `TTS × TTS` tile of the output for maximal data reuse |
 
 Both examples are designed to be simple to understand while demonstrating core concepts like kernel definition, memory management, and execution on a compute device.
 
