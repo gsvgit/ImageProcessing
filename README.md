@@ -33,7 +33,9 @@ The project is organized for clarity and ease of navigation:
     *   `MatrixMultiplication/`: The matrix multiplication implementation.
 *   `tests/`: Unit tests for the examples, ensuring correctness.
     *   `ImageProcessing.Tests/`
-    *   `MatrixMultiplication.Tests`
+    *   `MatrixMultiplication.Tests/`
+*   `benchmarks/`: Performance benchmarks.
+    *   `MatrixMultiplication.Benchmarks`: The matrix multiplication benchmarks.
 *   `.github/workflows/`: GitHub Actions CI/CD pipelines for automated building and testing.
 
 
@@ -64,3 +66,50 @@ Before you begin, ensure you have the following installed:
     ```bash
     dotnet build -c Release
     ```
+
+---
+
+## 📊 Matrix Multiplication Benchmarks
+
+The `benchmarks/MatrixMultiplication.Benchmarks/` project uses **BenchmarkDotNet** to measure GPU kernel execution times for all 5 matrix multiplication kernels (K0–K4) across matrix sizes 256–2048 and various work-group configurations.
+
+### Benchmark classes
+
+| Class | Extra params | Kernel |
+|---|---|---|
+| `K0Benchmark` | — | `multiplyKernel0` |
+| `K1Benchmark` | — | `multiplyKernel1` |
+| `K2Benchmark` | — | `multiplyKernel2` |
+| `K3Benchmark` | `WPT`: 1, 2, 4, 8 | `multiplyKernel3` with `workPerThread` |
+| `K4Benchmark` | `TTS`: 1, 2, 4, 8 | `multiplyKernel4` with `threadTileSize` |
+
+Common parameters across all classes:
+- **N** — matrix size: 256, 512, 1024, 2048
+- **LWS** — local work size: 8, 16, 32, 64, 128, 256 (device-dependent, some values may be invalid)
+
+### Design
+
+- **Measurement**: posts kernel command (async via `MailboxProcessor`) then synchronizes with `CreateToHostMsg` on a 1-element buffer — measures wall-clock GPU execution time
+- **Data transfer excluded**: buffers are allocated and filled with random data in `[GlobalSetup]`, outside the timed portion
+- **Cleanup**: `CreateFreeMsg` on all `ClArray` buffers in `[GlobalCleanup]`
+- **Invalid configs**: fail in `[GlobalSetup]` with descriptive message → BenchmarkDotNet marks as `NA` and continues
+
+### How to run
+
+```bash
+# Full run all kernels (default device):
+dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks
+
+# Quick smoke test (ShortRun = 3 warmup + 3 actual iterations):
+dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --job short --filter *K0Benchmark*
+
+# Selective kernels:
+dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --filter *K3Benchmark*
+
+# Specific OpenCL device:
+dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --device nvidia
+dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --device intel
+dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --device cpu
+```
+
+BenchmarkDotNet passes remaining CLI arguments (like `--filter`, `--job`, `--stopOnFirstError`) through to its own parser. Results are exported as CSV, Markdown, and HTML to `BenchmarkDotNet.Artifacts/results/`.
