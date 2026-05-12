@@ -33,6 +33,7 @@ The project is organized for clarity and ease of navigation:
     *   `MatrixMultiplication/`: The matrix multiplication implementation.
 *   `tests/`: Unit tests for the examples, ensuring correctness.
     *   `ImageProcessing.Tests/`
+    *   `MatrixMultiplication.Tests`
 *   `.github/workflows/`: GitHub Actions CI/CD pipelines for automated building and testing.
 
 
