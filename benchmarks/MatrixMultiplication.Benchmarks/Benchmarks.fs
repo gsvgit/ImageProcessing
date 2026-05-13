@@ -4,11 +4,6 @@ open BenchmarkDotNet.Attributes
 open Brahma.FSharp
 open ImageProcessing.Matrices
 
-module DeviceConfig =
-    let mutable device : ClDevice option = None
-    let getDevice () =
-        match device with Some d -> d | None -> ClDevice.GetFirstAppropriateDevice()
-
 [<AbstractClass>]
 type MxMBenchmark() =
     let mutable benchmark : (unit -> unit) = Unchecked.defaultof<_>
@@ -20,13 +15,23 @@ type MxMBenchmark() =
     [<Params(8, 16, 32, 64, 128, 256)>]
     member val LWS = 0 with get, set
 
+    [<Params("POCL", "Nvidia", "IntelGPU")>]
+    member val Device = "" with get, set
+
     abstract member Validate: unit -> unit
     abstract member CreateKernel: ctx:ClContext * lws:uint -> (MailboxProcessor<Msg> -> ClArray<float32> -> ClArray<float32> -> ClArray<float32> -> int -> unit)
 
     [<GlobalSetup>]
     member this.GlobalSetup() =
         this.Validate()
-        let dev = DeviceConfig.getDevice()
+        let platform =
+            match this.Device with
+            | "POCL" -> Platform.Custom "Portable*"
+            | "Nvidia" -> Platform.Nvidia
+            | "IntelGPU" -> Platform.Intel
+            | _ -> failwithf "Unknown device: %s" this.Device
+        let dev = ClDevice.GetAvailableDevices(platform = platform) |> Seq.head
+        printfn $"  Device: %s{dev.Name}"
         let ctx = ClContext(dev)
         let q = ctx.QueueProvider.CreateQueue()
         let n = this.N

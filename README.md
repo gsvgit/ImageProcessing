@@ -94,7 +94,7 @@ Before you begin, ensure you have the following installed:
 
 ## 📊 Matrix Multiplication Benchmarks
 
-The `benchmarks/MatrixMultiplication.Benchmarks/` project uses **BenchmarkDotNet** to measure GPU kernel execution times for all 5 matrix multiplication kernels (K0–K4) across matrix sizes 256–2048 and various work-group configurations.
+The `benchmarks/MatrixMultiplication.Benchmarks/` project uses **BenchmarkDotNet** to measure GPU kernel execution times for all 5 matrix multiplication kernels (K0–K4) across matrix sizes 256–2048, various work-group configurations, and all OpenCL platforms (POCL, Nvidia, Intel GPU).
 
 As far as benchmarks iterate over all possible configurations, they can be used as a tuner to choose optimal kernel configuration for particular device.
 
@@ -111,6 +111,7 @@ As far as benchmarks iterate over all possible configurations, they can be used 
 Common parameters across all classes:
 - **N** — matrix size: 256, 512, 1024, 2048
 - **LWS** — local work size: 8, 16, 32, 64, 128, 256 (device-dependent, some values may be invalid)
+- **Device** — OpenCL platform: `POCL`, `Nvidia`, `IntelGPU` (iterated by BDN via `[Params]`)
 
 ### Design
 
@@ -122,19 +123,17 @@ Common parameters across all classes:
 ### How to run
 
 ```bash
-# Full run all kernels (default device):
+# Full run all kernels on all devices:
 dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks
 
-# Quick smoke test (ShortRun = 3 warmup + 3 actual iterations):
+# Quick smoke test (ShortRun, single kernel):
 dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --job short --filter *K0Benchmark*
 
-# Selective kernels:
-dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --filter *K3Benchmark*
+# Selective kernel and device:
+dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --filter "*K3Benchmark*POCL*"
 
-# Specific OpenCL device:
-dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --device nvidia
-dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --device intel
-dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --device cpu
+# Run only one device:
+dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --filter "*Nvidia*"
 ```
 
 BenchmarkDotNet passes remaining CLI arguments (like `--filter`, `--job`, `--stopOnFirstError`) through to its own parser. Results are exported as CSV, Markdown, and HTML to `BenchmarkDotNet.Artifacts/results/`.
