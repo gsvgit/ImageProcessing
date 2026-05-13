@@ -180,3 +180,19 @@ dotnet run -c Release --project benchmarks/ImageProcessing.Benchmarks -- --filte
 ```
 
 BenchmarkDotNet passes remaining CLI arguments (like `--filter`, `--job`, `--stopOnFirstError`) through to its own parser. Results are exported as CSV, Markdown, and HTML to `BenchmarkDotNet.Artifacts/results/`.
+
+### Analysis script
+
+The Python script [`benchmarks/analyze_benchmarks.py`](benchmarks/analyze_benchmarks.py) reads the CSV results and generates two comparison plots:
+
+- **GPU work-group size comparison** (left): compares Intel UHD Graphics 620, NVIDIA GeForce MX150, and POCL (CPU OpenCL) across all work-group sizes (8–256) at the largest image (8000×8000)
+- **CPU vs best GPU configurations** (right): compares all three CPU variants (sequential, pixel-parallel, rows-parallel) against the best-performing LWS per GPU device across all image sizes
+
+![Benchmark comparison](figures/benchmark_comparison.svg)
+
+**Requirements:** `pandas`, `matplotlib`, `numpy`
+
+```bash
+pip install pandas matplotlib numpy
+python benchmarks/analyze_benchmarks.py
+```

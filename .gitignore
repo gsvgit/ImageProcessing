@@ -271,3 +271,7 @@ out/
 
 # BenchmarkBotNet
 **/BenchmarkDotNet.Artifacts/
+
+
+# Benchmark analysis script output 
+benchmarks/*.svg
