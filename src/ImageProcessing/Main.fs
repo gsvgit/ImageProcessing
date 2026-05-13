@@ -74,7 +74,7 @@ module Main =
             match platform with
             | Platforms.CPUSequential ->
                 let sw = Stopwatch.StartNew()
-                let image = ImageProcessing.loadAs2DArray input
+                let image = ImageProcessing.loadAsImage input
                 let loadTime = sw.Elapsed.TotalMilliseconds
                 printfn $"  Load                : {loadTime,8:F1} ms"
 
@@ -86,7 +86,7 @@ module Main =
                 printfn $"  Process             : {processTime,8:F1} ms"
 
                 sw.Restart()
-                ImageProcessing.save2DByteArrayAsImage current output
+                ImageProcessing.saveImage current output
                 let saveTime = sw.Elapsed.TotalMilliseconds
                 printfn $"  Save                : {saveTime,8:F1} ms"
                 printfn $"  ----------------------------------"
@@ -94,7 +94,7 @@ module Main =
 
             | Platforms.CPUParallel ->
                 let sw = Stopwatch.StartNew()
-                let image = ImageProcessing.loadAs2DArray input
+                let image = ImageProcessing.loadAsImage input
                 let loadTime = sw.Elapsed.TotalMilliseconds
                 printfn $"  Load                : {loadTime,8:F1} ms"
 
@@ -106,7 +106,7 @@ module Main =
                 printfn $"  Process             : {processTime,8:F1} ms"
 
                 sw.Restart()
-                ImageProcessing.save2DByteArrayAsImage current output
+                ImageProcessing.saveImage current output
                 let saveTime = sw.Elapsed.TotalMilliseconds
                 printfn $"  Save                : {saveTime,8:F1} ms"
                 printfn $"  ----------------------------------"

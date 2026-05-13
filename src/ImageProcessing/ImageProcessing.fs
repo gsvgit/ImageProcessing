@@ -20,16 +20,6 @@ type Image =
             Name = name
         }
 
-let loadAs2DArray (file: string) =
-    let img = Image.Load<L8> file
-    let res = Array2D.zeroCreate img.Height img.Width
-
-    for i in 0 .. img.Width - 1 do
-        for j in 0 .. img.Height - 1 do
-            res.[j, i] <- img.Item(i, j).PackedValue
-    
-    res
-
 let loadAsImage (file: string) =
     let img = Image.Load<L8> file
 
@@ -41,21 +31,6 @@ let loadAsImage (file: string) =
 
     img.CopyPixelDataTo(Span<byte> buf)
     Image(buf, img.Width, img.Height, System.IO.Path.GetFileName file)
-
-let save2DByteArrayAsImage (imageData: byte[,]) file =
-    let h = imageData.GetLength 0
-    let w = imageData.GetLength 1
-
-    let flat2Darray array2D =
-        seq {
-            for x in [0 .. (Array2D.length1 array2D) - 1] do
-                for y in [0 .. (Array2D.length2 array2D) - 1] do
-                    yield array2D.[x, y]
-        }
-        |> Array.ofSeq
-
-    let img = Image.LoadPixelData<L8>(flat2Darray imageData, w, h)
-    img.Save file
 
 let saveImage (image: Image) file =
     let img = Image.LoadPixelData<L8>(image.Data, image.Width, image.Height)
@@ -146,103 +121,49 @@ let edgesKernel =
     |]
     |> Array.map (Array.map float32)
 
-let applyFilter (filter: float32[][]) (img: byte[,]) =
-    let imgH = img.GetLength 0
-    let imgW = img.GetLength 1
-
+let applyFilter (filter: float32[][]) (img: Image) =
+    let imgH, imgW = img.Height, img.Width
     let filterD = (Array.length filter) / 2
-
-    let filter = Array.concat filter
-
+    let filterFlat = Array.concat filter
     let processPixel px py =
         let dataToHandle = [|
             for i in px - filterD .. px + filterD do
                 for j in py - filterD .. py + filterD do
-                    if  i < 0 || i >= imgH || j < 0 || j >= imgW
-                    then float32 img.[px, py]
-                    else float32 img.[i, j]
+                    if i < 0 || i >= imgH || j < 0 || j >= imgW
+                    then float32 img.Data.[px * imgW + py]
+                    else float32 img.Data.[i * imgW + j]
         |]
+        Array.fold2 (fun s x y -> s + x * y) 0.0f filterFlat dataToHandle
+    let resultData = Array.init (imgH * imgW) (fun p -> byte (processPixel (p / imgW) (p % imgW)))
+    Image(resultData, imgW, imgH, img.Name)
 
-        Array.fold2 (fun s x y -> s + x * y) 0.0f filter dataToHandle
-
-    Array2D.mapi (fun x y _ -> byte (processPixel x y)) img
-
-let applyFilterCpuParallel (filter: float32[][]) (img: byte[,]) =
-    let imgH = img.GetLength 0
-    let imgW = img.GetLength 1
-
-    let img = 
-        [| 
-            let height = img.GetLength 0
-            for row in 0..height-1  do
-            yield img.[row,*] 
-        |]
-
+let applyFilterCpuParallel (filter: float32[][]) (img: Image) =
+    let imgH, imgW = img.Height, img.Width
     let filterD = (Array.length filter) / 2
-
-    let filter = Array.concat filter
-
+    let filterFlat = Array.concat filter
     let processPixel px py =
         let dataToHandle = [|
             for i in px - filterD .. px + filterD do
                 for j in py - filterD .. py + filterD do
-                    if  i < 0 || i >= imgH || j < 0 || j >= imgW
-                    then float32 <| img[px][py]
-                    else float32 <| img[i][j]
+                    if i < 0 || i >= imgH || j < 0 || j >= imgW
+                    then float32 img.Data.[px * imgW + py]
+                    else float32 img.Data.[i * imgW + j]
         |]
-
-        Array.fold2 (fun s x y -> s + x * y) 0.0f filter dataToHandle
-
-    Array.Parallel.mapi (fun x a -> Array.mapi (fun y _ -> byte (processPixel x y)) a ) img
-    |> array2D
-
-let applyFilterToImage (filter: float32[][]) (img: Image) =
-    let h, w = img.Height, img.Width
-    let filterD = (Array.length filter) / 2
-    let filterFlat = Array.concat filter
-    let result = Array.zeroCreate (h * w)
-
-    for px in 0 .. h - 1 do
-        for py in 0 .. w - 1 do
-            let mutable sum = 0.0f
-            for i in px - filterD .. px + filterD do
-                for j in py - filterD .. py + filterD do
-                    let di = if i < 0 || i >= h then px else i
-                    let dj = if j < 0 || j >= w then py else j
-                    sum <- sum + float32 img.Data.[di * w + dj] * filterFlat.[(i - px + filterD) * (2 * filterD + 1) + (j - py + filterD)]
-            result.[px * w + py] <- byte (int sum)
-
-    Image(result, w, h, img.Name)
-
-let applyFilterToImageParallel (filter: float32[][]) (img: Image) =
-    let h, w = img.Height, img.Width
-    let filterD = (Array.length filter) / 2
-    let filterFlat = Array.concat filter
-    let result = Array.zeroCreate (h * w)
-
-    let processRow px =
-        for py in 0 .. w - 1 do
-            let mutable sum = 0.0f
-            for i in px - filterD .. px + filterD do
-                for j in py - filterD .. py + filterD do
-                    let di = if i < 0 || i >= h then px else i
-                    let dj = if j < 0 || j >= w then py else j
-                    sum <- sum + float32 img.Data.[di * w + dj] * filterFlat.[(i - px + filterD) * (2 * filterD + 1) + (j - py + filterD)]
-            result.[px * w + py] <- byte (int sum)
-
-    Array.Parallel.iter (fun px -> processRow px) [|0 .. h - 1|]
-    Image(result, w, h, img.Name)
+        Array.fold2 (fun s x y -> s + x * y) 0.0f filterFlat dataToHandle
+    let resultData = Array.zeroCreate (imgH * imgW)
+    Array.Parallel.iter (fun p -> resultData.[p] <- byte (processPixel (p / imgW) (p % imgW))) [|0 .. imgH * imgW - 1|]
+    Image(resultData, imgW, imgH, img.Name)
 
 let applyFiltersCPU (filters: list<float32[][]>) (img: Image) =
     let mutable current = img
     for filter in filters do
-        current <- applyFilterToImage filter current
+        current <- applyFilter filter current
     current
 
 let applyFiltersCPUParallel (filters: list<float32[][]>) (img: Image) =
     let mutable current = img
     for filter in filters do
-        current <- applyFilterToImageParallel filter current
+        current <- applyFilterCpuParallel filter current
     current
 
 let applyFilterGPUKernel (clContext: ClContext) localWorkSize =
