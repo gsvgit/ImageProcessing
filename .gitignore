@@ -268,3 +268,6 @@ coverage.*.xml
 .paket/paket
 
 out/
+
+# BenchmarkBotNet
+**/BenchmarkDotNet.Artifacts/
