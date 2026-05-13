@@ -21,7 +21,6 @@ type ImageProcessingArguments =
     | MatrixType of MatrixTypes 
     | Semiring of Semirings
     | NumToRun of uint
-    | Tune of bool
 
     with
     interface IArgParserTemplate with
@@ -36,7 +35,6 @@ type ImageProcessingArguments =
             | MatrixType _ -> "Type of elements of matrices."
             | Semiring _ -> "Semiring to operate with matrices."
             | NumToRun _ -> "How many times run the kernel specified."
-            | Tune _ -> "Run parameters tuning, not benchmarks."
 
 module Main =
     let optIntZero = <@None@>
@@ -54,7 +52,6 @@ module Main =
         let matrixType = results.GetResult(MatrixType, defaultValue = MatrixTypes.MT_int)
         let semiring = results.GetResult(Semiring, defaultValue = Semirings.Arithmetic)
         let numToRun = results.GetResult(NumToRun, defaultValue = 1u)
-        let tune = results.GetResult(Tune, defaultValue = false)
 
 
         let time mXm checker m1 m2 =
@@ -93,9 +90,7 @@ module Main =
 
             let context = ClContext(device)
 
-            if tune 
-            then ImageProcessing.Tuner.tune kernel context numToRun opAdd opMult zero
-            else Matrices.applyMultiplyGPU kernel context numToRun workGroupSize workPerThread opAdd opMult zero
+            Matrices.applyMultiplyGPU kernel context numToRun workGroupSize workPerThread opAdd opMult zero
         
         let inline mXmKernel opAdd opMult zero = 
             match platform with 
