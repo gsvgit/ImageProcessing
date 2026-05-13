@@ -97,6 +97,38 @@ let ``CPU sequential and CPU parallel produce same result`` () =
 
 [<Fact>]
 [<Trait("Category", "CPU_Tests")>]
+let ``CPU sequential and CPU parallel rows produce same result`` () =
+    let img = randomImage 32 32
+    let filter = randomFilter 5
+    let resultSeq = applyFilter filter img
+    let resultRows = applyFilterCpuParallelRows filter img
+    Assert.True(imagesEqual resultSeq resultRows)
+
+[<Fact>]
+[<Trait("Category", "CPU_Tests")>]
+let ``CPU parallel (pixel) and CPU parallel (rows) produce same result`` () =
+    let img = randomImage 32 32
+    let filter = randomFilter 5
+    let resultPix = applyFilterCpuParallel filter img
+    let resultRows = applyFilterCpuParallelRows filter img
+    Assert.True(imagesEqual resultPix resultRows)
+
+[<Fact>]
+[<Trait("Category", "CPU_Tests")>]
+let ``Shift right filter with CPU parallel rows shifts image right`` () =
+    let w, h = 8, 8
+    let img = randomImage h w
+    let result = applyFilterCpuParallelRows shiftRightFilter img
+
+    for y in 0 .. h - 1 do
+        for x in 0 .. w - 1 do
+            if x > 0 then
+                Assert.Equal(img.Data.[y * w + (x - 1)], result.Data.[y * w + x])
+            else
+                Assert.Equal(img.Data.[y * w + x], result.Data.[y * w + x])
+
+[<Fact>]
+[<Trait("Category", "CPU_Tests")>]
 let ``Gaussian blur preserves constant image`` () =
     let data = Array.create (16 * 16) 128uy
     let img = Image(data, 16, 16, "test")

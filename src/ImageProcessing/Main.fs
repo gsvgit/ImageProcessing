@@ -8,6 +8,7 @@ open System.Diagnostics
 type Platforms =
     | CPUSequential = 1
     | CPUParallel = 2
+    | CPUParallelRows = 7
     | CPUOpencl = 3
     | Nvidia = 4
     | IntelGPU = 5
@@ -27,7 +28,7 @@ type ImageProcessingArguments =
             match arg with
             | Input _       -> "Image or directory to process."
             | Output _      -> "Output file or directory."
-            | Platform _    -> "Processor: CPUSequential / CPUParallel / CPUOpencl / Nvidia / IntelGPU / AnyGPU"
+            | Platform _    -> "Processor: CPUSequential / CPUParallel / CPUParallelRows / CPUOpencl / Nvidia / IntelGPU / AnyGPU"
             | WorkGroupSize _ -> "Work group size for GPU/OpenCL (default: 64)"
             | Workers _     -> "Streaming mode. List of parallel workers for filters application."
 
@@ -112,6 +113,26 @@ module Main =
                 printfn $"  ----------------------------------"
                 printfn $"  Total               : {loadTime + processTime + saveTime,8:F1} ms"
 
+            | Platforms.CPUParallelRows ->
+                let sw = Stopwatch.StartNew()
+                let image = ImageProcessing.loadAsImage input
+                let loadTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Load                : {loadTime,8:F1} ms"
+
+                sw.Restart()
+                let mutable current = image
+                for filter in filters do
+                    current <- ImageProcessing.applyFilterCpuParallelRows filter current
+                let processTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Process             : {processTime,8:F1} ms"
+
+                sw.Restart()
+                ImageProcessing.saveImage current output
+                let saveTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Save                : {saveTime,8:F1} ms"
+                printfn $"  ----------------------------------"
+                printfn $"  Total               : {loadTime + processTime + saveTime,8:F1} ms"
+
             | Platforms.CPUOpencl
             | Platforms.Nvidia
             | Platforms.IntelGPU
@@ -164,10 +185,13 @@ module Main =
                     match p with
                     | Platforms.CPUSequential ->
                         printfn $"  Worker: CPUSequential"
-                        ImageProcessing.applyFiltersCPU filters
+                        ImageProcessing.applyFiltersOnCpu ImageProcessing.applyFilter filters
                     | Platforms.CPUParallel ->
                         printfn $"  Worker: CPUParallel"
-                        ImageProcessing.applyFiltersCPUParallel filters
+                        ImageProcessing.applyFiltersOnCpu ImageProcessing.applyFilterCpuParallel filters
+                    | Platforms.CPUParallelRows ->
+                        printfn $"  Worker: CPUParallelRows"
+                        ImageProcessing.applyFiltersOnCpu ImageProcessing.applyFilterCpuParallelRows filters
                     | Platforms.CPUOpencl
                     | Platforms.Nvidia
                     | Platforms.IntelGPU
