@@ -17,7 +17,19 @@ Few example how to utilize GPGPU in F# code using [Brahma.FSharp](https://github
 
 This project currently includes two classic GPGPU examples:
 
-1.  **Image Convolution**: Applies various filters (like blur, sharpen, edge detection) to images. This operation is inherently parallel, as each output pixel can be computed independently from its neighbors, making it an ideal candidate for GPU acceleration. (Located in [`src/ImageProcessing/`](src/ImageProcessing)).
+1.  **Image Convolution**: Applies filters (Gaussian blur, edge detection) to images using a configurable kernel. This operation is inherently parallel — each output pixel can be computed independently from its neighbors — making it an ideal candidate for GPU acceleration. (Located in [`src/ImageProcessing/`](src/ImageProcessing)).
+
+    | Implementation | Function | Parallelism |
+    |---|---|---|
+    | CPU Sequential | `applyFilter` | Single-threaded pixel loop |
+    | CPU Parallel (per-pixel) | `applyFilterCpuParallel` | `Array.Parallel.iter` over flat pixel array |
+    | CPU Parallel (per-row) | `applyFilterCpuParallelRows` | `Array.Parallel.iter` over rows, sequential within each row |
+    | GPU (any OpenCL device) | `applyFiltersGPU` | OpenCL kernel, configurable local work size |
+
+    **Streaming mode**: A `MailboxProcessor`-based pipeline that loads images from a directory, distributes them across multiple filter workers (each potentially on a different platform), and saves results — all concurrently.
+
+    **CLI**: Argu-based argument parser supports `--input`, `--output`, `--platform` (6 backends), `--work-group-size`, and `--workers` for streaming.
+
 2.  **Matrix Multiplication**: Implements the multiplication of two large matrices on the GPU. This is a fundamental operation in many scientific and engineering domains and perfectly illustrates data-parallel computing. (Located in [`src/MatrixMultiplication/`](src/MatrixMultiplication) ). Inspired by [Cedric Nugteren's OpenCL SGEMM tutorial](https://cnugteren.github.io/tutorial/pages/page1.html).
 
     Implemented kernels (K0–K4), each building on the previous with progressive optimizations:
@@ -39,13 +51,14 @@ Both examples are designed to be simple to understand while demonstrating core c
 The project is organized for clarity and ease of navigation:
 
 *   `src/`: Contains all source code.
-    *   `ImageProcessing/`: The image convolution example and related logic.
-    *   `MatrixMultiplication/`: The matrix multiplication implementation.
+    *   `ImageProcessing/`: `Image` type, filter kernels, CPU/GPU convolution, `MailboxProcessor` streaming pipeline, CLI entry point.
+    *   `MatrixMultiplication/`: Matrix multiplication kernels (K0–K4) and CLI entry point.
 *   `tests/`: Unit tests for the examples, ensuring correctness.
-    *   `ImageProcessing.Tests/`
-    *   `MatrixMultiplication.Tests/`
+    *   `ImageProcessing.Tests/`: Xunit tests for all CPU and GPU filter variants.
+    *   `MatrixMultiplication.Tests/`: Xunit tests for matrix multiplication kernels.
 *   `benchmarks/`: Performance benchmarks.
-    *   `MatrixMultiplication.Benchmarks`: The matrix multiplication benchmarks.
+    *   `MatrixMultiplication.Benchmarks/`: Benchmarks for matrix multiplication kernels K0–K4.
+    *   `ImageProcessing.Benchmarks/`: Benchmarks for image convolution on all CPU and GPU backends.
 *   `.github/workflows/`: GitHub Actions CI/CD pipelines for automated building and testing.
 
 
@@ -122,6 +135,48 @@ dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --
 dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --device nvidia
 dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --device intel
 dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --device cpu
+```
+
+BenchmarkDotNet passes remaining CLI arguments (like `--filter`, `--job`, `--stopOnFirstError`) through to its own parser. Results are exported as CSV, Markdown, and HTML to `BenchmarkDotNet.Artifacts/results/`.
+
+---
+
+## 📊 Image Processing Benchmarks
+
+The `benchmarks/ImageProcessing.Benchmarks/` project uses **BenchmarkDotNet** to measure filter processing times across all available backends — CPU sequential, CPU parallel (per-pixel and per-row), and GPU (POCL, Nvidia, Intel GPU) — for square images from 100×100 up to 8000×8000 pixels.
+
+### Benchmark classes
+
+| Class | Device param | Extra params |
+|---|---|---|
+| `CpuFilterBench` | `CPUSequential`, `CPUParallel`, `CPUParallelRows` | — |
+| `GpuFilterBench` | `POCL`, `Nvidia`, `IntelGPU` | `LWS`: 8, 16, 32, 64, 128, 256 |
+
+Common parameter across all classes:
+- **Size** — image side in pixels: 100, 200, 500, 1000, 2000, 4000, 8000
+
+### Design
+
+- **Image generation**: each benchmark generates a random square image (deterministic seed `Random 42`) in `[GlobalSetup]` — excluded from measurement
+- **Filter**: all benchmarks use `gaussianBlurKernel` (5×5 normalized) — a module-level constant, not recreated per invocation
+- **Measurement**: the `[Benchmark]` method applies exactly one filter pass and discards the result; only the processing time is captured
+- **GPU setup**: `ClContext` and GPU applier are created once in `[GlobalSetup]`; the device name is printed at startup
+- **No redundant combinations**: `LWS` is only parameterized for GPU benchmarks — CPU benchmarks have zero useless LWS configurations
+
+### How to run
+
+```bash
+# Full run (interactive menu selects CPU or GPU benchmarks):
+dotnet run -c Release --project benchmarks/ImageProcessing.Benchmarks
+
+# Quick smoke test (CPU only, ShortRun):
+dotnet run -c Release --project benchmarks/ImageProcessing.Benchmarks -- --job short --filter *CpuFilterBench*
+
+# GPU benchmarks with specific LWS range:
+dotnet run -c Release --project benchmarks/ImageProcessing.Benchmarks -- --filter *GpuFilterBench*
+
+# Run only one device variant:
+dotnet run -c Release --project benchmarks/ImageProcessing.Benchmarks -- --filter "*CPUParallel*"
 ```
 
 BenchmarkDotNet passes remaining CLI arguments (like `--filter`, `--job`, `--stopOnFirstError`) through to its own parser. Results are exported as CSV, Markdown, and HTML to `BenchmarkDotNet.Artifacts/results/`.
