@@ -83,6 +83,8 @@ Before you begin, ensure you have the following installed:
 
 The `benchmarks/MatrixMultiplication.Benchmarks/` project uses **BenchmarkDotNet** to measure GPU kernel execution times for all 5 matrix multiplication kernels (K0–K4) across matrix sizes 256–2048 and various work-group configurations.
 
+As far as benchmarks iterate over all possible configurations, they can be used as a tuner to choose optimal kernel configuration for particular device.
+
 ### Benchmark classes
 
 | Class | Extra params | Kernel |
