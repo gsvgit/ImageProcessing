@@ -57,6 +57,39 @@ module Main =
         let ctx = ClContext(device)
         (ImageProcessing.applyFiltersGPU ctx lws) filters
 
+    let getProcessor (filters: list<float32[][]>) (workGroupSize: int) (platform: Platforms) =
+        match platform with
+        | Platforms.CPUSequential ->
+            ImageProcessing.applyFiltersOnCpu ImageProcessing.applyFilter filters
+        | Platforms.CPUParallel ->
+            ImageProcessing.applyFiltersOnCpu ImageProcessing.applyFilterCpuParallel filters
+        | Platforms.CPUParallelRows ->
+            ImageProcessing.applyFiltersOnCpu ImageProcessing.applyFilterCpuParallelRows filters
+        | Platforms.CPUOpencl
+        | Platforms.Nvidia
+        | Platforms.IntelGPU
+        | Platforms.AnyGPU ->
+            createGPUApplier platform filters workGroupSize
+        | _ -> failwithf "Unknown platform: %A" platform
+
+    let runWithTiming imagePath imgProcessor outputPath =
+        let sw = Stopwatch.StartNew()
+        let image = ImageProcessing.loadAsImage imagePath
+        let loadTime = sw.Elapsed.TotalMilliseconds
+        printfn $"  Load                : {loadTime,8:F1} ms"
+
+        sw.Restart()
+        let result = imgProcessor image
+        let processTime = sw.Elapsed.TotalMilliseconds
+        printfn $"  Process             : {processTime,8:F1} ms"
+
+        sw.Restart()
+        ImageProcessing.saveImage result outputPath
+        let saveTime = sw.Elapsed.TotalMilliseconds
+        printfn $"  Save                : {saveTime,8:F1} ms"
+        printfn $"  ----------------------------------"
+        printfn $"  Total               : {loadTime + processTime + saveTime,8:F1} ms"
+
     [<EntryPoint>]
     let main (argv: string array) =
         let parser = ArgumentParser.Create<ImageProcessingArguments>(programName = "ImageProcessing")
@@ -71,106 +104,8 @@ module Main =
 
         let runSingleImage () =
             printfn "\n========== Single Image ==========\n"
-
-            match platform with
-            | Platforms.CPUSequential ->
-                let sw = Stopwatch.StartNew()
-                let image = ImageProcessing.loadAsImage input
-                let loadTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Load                : {loadTime,8:F1} ms"
-
-                sw.Restart()
-                let mutable current = image
-                for filter in filters do
-                    current <- ImageProcessing.applyFilter filter current
-                let processTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Process             : {processTime,8:F1} ms"
-
-                sw.Restart()
-                ImageProcessing.saveImage current output
-                let saveTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Save                : {saveTime,8:F1} ms"
-                printfn $"  ----------------------------------"
-                printfn $"  Total               : {loadTime + processTime + saveTime,8:F1} ms"
-
-            | Platforms.CPUParallel ->
-                let sw = Stopwatch.StartNew()
-                let image = ImageProcessing.loadAsImage input
-                let loadTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Load                : {loadTime,8:F1} ms"
-
-                sw.Restart()
-                let mutable current = image
-                for filter in filters do
-                    current <- ImageProcessing.applyFilterCpuParallel filter current
-                let processTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Process             : {processTime,8:F1} ms"
-
-                sw.Restart()
-                ImageProcessing.saveImage current output
-                let saveTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Save                : {saveTime,8:F1} ms"
-                printfn $"  ----------------------------------"
-                printfn $"  Total               : {loadTime + processTime + saveTime,8:F1} ms"
-
-            | Platforms.CPUParallelRows ->
-                let sw = Stopwatch.StartNew()
-                let image = ImageProcessing.loadAsImage input
-                let loadTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Load                : {loadTime,8:F1} ms"
-
-                sw.Restart()
-                let mutable current = image
-                for filter in filters do
-                    current <- ImageProcessing.applyFilterCpuParallelRows filter current
-                let processTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Process             : {processTime,8:F1} ms"
-
-                sw.Restart()
-                ImageProcessing.saveImage current output
-                let saveTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Save                : {saveTime,8:F1} ms"
-                printfn $"  ----------------------------------"
-                printfn $"  Total               : {loadTime + processTime + saveTime,8:F1} ms"
-
-            | Platforms.CPUOpencl
-            | Platforms.Nvidia
-            | Platforms.IntelGPU
-            | Platforms.AnyGPU ->
-                let device =
-                    match platform with
-                    | Platforms.CPUOpencl ->
-                        ClDevice.GetAvailableDevices(platform = Platform.Custom "Portable*") |> Seq.head
-                    | Platforms.Nvidia ->
-                        ClDevice.GetAvailableDevices(platform = Platform.Nvidia) |> Seq.head
-                    | Platforms.IntelGPU ->
-                        ClDevice.GetAvailableDevices(platform = Platform.Intel) |> Seq.head
-                    | _ -> ClDevice.GetFirstAppropriateDevice()
-                printfn $"  Device: %s{device.Name}"
-
-                let sw = Stopwatch.StartNew()
-                let image = ImageProcessing.loadAsImage input
-                let loadTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Load                : {loadTime,8:F1} ms"
-
-                let applier = createGPUApplier platform filters (int workGroupSize)
-
-                sw.Restart()
-                let result = applier image
-                let processTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Process             : {processTime,8:F1} ms"
-
-                sw.Restart()
-                ImageProcessing.saveImage result output
-                let saveTime = sw.Elapsed.TotalMilliseconds
-                printfn $"  Save                : {saveTime,8:F1} ms"
-                printfn $"  ----------------------------------"
-                printfn $"  Total               : {loadTime + processTime + saveTime,8:F1} ms"
-
-            | _ ->
-                printfn $"Unknown platform: %A{platform}"
-                exit 1
-
+            let processor = getProcessor filters (int workGroupSize) platform
+            runWithTiming input processor output
             0
 
         let runStreaming () =
@@ -182,24 +117,8 @@ module Main =
                 1
             else
                 let appliers = workers |> List.map (fun p ->
-                    match p with
-                    | Platforms.CPUSequential ->
-                        printfn $"  Worker: CPUSequential"
-                        ImageProcessing.applyFiltersOnCpu ImageProcessing.applyFilter filters
-                    | Platforms.CPUParallel ->
-                        printfn $"  Worker: CPUParallel"
-                        ImageProcessing.applyFiltersOnCpu ImageProcessing.applyFilterCpuParallel filters
-                    | Platforms.CPUParallelRows ->
-                        printfn $"  Worker: CPUParallelRows"
-                        ImageProcessing.applyFiltersOnCpu ImageProcessing.applyFilterCpuParallelRows filters
-                    | Platforms.CPUOpencl
-                    | Platforms.Nvidia
-                    | Platforms.IntelGPU
-                    | Platforms.AnyGPU ->
-                        createGPUApplier p filters (int workGroupSize)
-                    | _ ->
-                        printfn $"  Unknown platform: %A{p}"
-                        failwithf "Unknown platform: %A{p}"
+                    printfn $"  Worker: %A{p}"
+                    getProcessor filters (int workGroupSize) p
                 )
 
                 printfn ""
