@@ -196,6 +196,55 @@ let applyFilterCpuParallel (filter: float32[][]) (img: byte[,]) =
     Array.Parallel.mapi (fun x a -> Array.mapi (fun y _ -> byte (processPixel x y)) a ) img
     |> array2D
 
+let applyFilterToImage (filter: float32[][]) (img: Image) =
+    let h, w = img.Height, img.Width
+    let filterD = (Array.length filter) / 2
+    let filterFlat = Array.concat filter
+    let result = Array.zeroCreate (h * w)
+
+    for px in 0 .. h - 1 do
+        for py in 0 .. w - 1 do
+            let mutable sum = 0.0f
+            for i in px - filterD .. px + filterD do
+                for j in py - filterD .. py + filterD do
+                    let di = if i < 0 || i >= h then px else i
+                    let dj = if j < 0 || j >= w then py else j
+                    sum <- sum + float32 img.Data.[di * w + dj] * filterFlat.[(i - px + filterD) * (2 * filterD + 1) + (j - py + filterD)]
+            result.[px * w + py] <- byte (int sum)
+
+    Image(result, w, h, img.Name)
+
+let applyFilterToImageParallel (filter: float32[][]) (img: Image) =
+    let h, w = img.Height, img.Width
+    let filterD = (Array.length filter) / 2
+    let filterFlat = Array.concat filter
+    let result = Array.zeroCreate (h * w)
+
+    let processRow px =
+        for py in 0 .. w - 1 do
+            let mutable sum = 0.0f
+            for i in px - filterD .. px + filterD do
+                for j in py - filterD .. py + filterD do
+                    let di = if i < 0 || i >= h then px else i
+                    let dj = if j < 0 || j >= w then py else j
+                    sum <- sum + float32 img.Data.[di * w + dj] * filterFlat.[(i - px + filterD) * (2 * filterD + 1) + (j - py + filterD)]
+            result.[px * w + py] <- byte (int sum)
+
+    Array.Parallel.iter (fun px -> processRow px) [|0 .. h - 1|]
+    Image(result, w, h, img.Name)
+
+let applyFiltersCPU (filters: list<float32[][]>) (img: Image) =
+    let mutable current = img
+    for filter in filters do
+        current <- applyFilterToImage filter current
+    current
+
+let applyFiltersCPUParallel (filters: list<float32[][]>) (img: Image) =
+    let mutable current = img
+    for filter in filters do
+        current <- applyFilterToImageParallel filter current
+    current
+
 let applyFilterGPUKernel (clContext: ClContext) localWorkSize =
 
 

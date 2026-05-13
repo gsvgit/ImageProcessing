@@ -3,8 +3,15 @@ namespace ImageProcessing
 open Argu
 open Argu.ArguAttributes
 open Brahma.FSharp
+open System.Diagnostics
 
-type Platforms = CPU = 1 | CPUParallel = 2 | Nvidia = 3 | IntelGPU = 4 | AnyGPU = 5
+type Platforms =
+    | CPUSequential = 1
+    | CPUParallel = 2
+    | CPUOpencl = 3
+    | Nvidia = 4
+    | IntelGPU = 5
+    | AnyGPU = 6
 
 [<CliPrefix(CliPrefix.DoubleDash)>]
 [<NoAppSettings>]
@@ -13,25 +20,41 @@ type ImageProcessingArguments =
     | Output of string
     | Platform of Platforms
     | WorkGroupSize of uint
-    | Stream of list<Platforms>
+    | Workers of list<Platforms>
     with
     interface IArgParserTemplate with
         member arg.Usage =
             match arg with
-            | Input _  -> "Image to process."
-            | Output _ -> "File to store result."
-            | Platform _ -> "Where to run."
-            | WorkGroupSize _ -> "Work group size."
-            | Stream _ -> "Folder processing on multiple devices."
+            | Input _       -> "Image or directory to process."
+            | Output _      -> "Output file or directory."
+            | Platform _    -> "Processor: CPUSequential / CPUParallel / CPUOpencl / Nvidia / IntelGPU / AnyGPU"
+            | WorkGroupSize _ -> "Work group size for GPU/OpenCL (default: 64)"
+            | Workers _     -> "Streaming mode. List of parallel workers for filters application."
 
 module Main =
-    //let pathToExamples = "/home/gsv/Projects/TestProj2020/src/ImgProcessing/Examples"
-    //let inputFolder = System.IO.Path.Combine(pathToExamples, "input")
-    //let outputFolder = System.IO.Path.Combine(pathToExamples, "output")
+    let defaultFilters = [
+        ImageProcessing.gaussianBlurKernel
+        ImageProcessing.gaussianBlurKernel
+        ImageProcessing.gaussianBlurKernel
+        ImageProcessing.gaussianBlurKernel
+        ImageProcessing.edgesKernel
+    ]
 
-    //let demoFileName = "armin-djuhic-ohc29QXbS-s-unsplash.jpg"
-    //let demoFile =
-    //    System.IO.Path.Combine(inputFolder, demoFileName)
+    let createGPUApplier platform filters lws =
+        let device =
+            match platform with
+            | Platforms.CPUOpencl ->
+                ClDevice.GetAvailableDevices(platform = Platform.Custom "Portable*") |> Seq.head
+            | Platforms.Nvidia ->
+                ClDevice.GetAvailableDevices(platform = Platform.Nvidia) |> Seq.head
+            | Platforms.IntelGPU ->
+                ClDevice.GetAvailableDevices(platform = Platform.Intel) |> Seq.head
+            | Platforms.AnyGPU ->
+                ClDevice.GetFirstAppropriateDevice()
+            | _ -> failwithf "Not a GPU platform: %A" platform
+        printfn $"  Device: %s{device.Name}"
+        let ctx = ClContext(device)
+        (ImageProcessing.applyFiltersGPU ctx lws) filters
 
     [<EntryPoint>]
     let main (argv: string array) =
@@ -39,88 +62,130 @@ module Main =
         let results = parser.ParseCommandLine argv
         let input = results.GetResult(Input, defaultValue = "")
         let output = results.GetResult(Output, defaultValue = "out.jpg")
-        let platform = results.GetResult(Platform, defaultValue = Platforms.CPU)
+        let platform = results.GetResult(Platform, defaultValue = Platforms.CPUSequential)
         let workGroupSize = results.GetResult(WorkGroupSize, defaultValue = 64u)
-        let devicesForStream = results.GetResult(Stream, defaultValue = [])
+        let workers = results.GetResult(Workers, defaultValue = [])
 
-        let filters = [
-            ImageProcessing.gaussianBlurKernel
-            ImageProcessing.gaussianBlurKernel
-            ImageProcessing.gaussianBlurKernel
-            ImageProcessing.gaussianBlurKernel
-            ImageProcessing.edgesKernel
-        ]
+        let filters = defaultFilters
 
-        
-        let applyFiltersOnGPU platform =
-            let device =
-                match platform with 
-                | Platforms.AnyGPU -> ClDevice.GetFirstAppropriateDevice()
-                | _ -> 
-                    let platform =
-                        match platform with 
-                        | Platforms.Nvidia -> Platform.Nvidia
-                        | Platforms.IntelGPU -> Platform.Intel
-                    ClDevice.GetAvailableDevices(platform = platform)
-                    |> Seq.head
-            printfn $"Device: %A{device.Name}"
+        let runSingleImage () =
+            printfn "\n========== Single Image ==========\n"
 
-            let context = ClContext device
-            ImageProcessing.applyFiltersGPU context 64
+            match platform with
+            | Platforms.CPUSequential ->
+                let sw = Stopwatch.StartNew()
+                let image = ImageProcessing.loadAs2DArray input
+                let loadTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Load                : {loadTime,8:F1} ms"
 
-        match devicesForStream with 
-        | hd :: tl ->           
-          let appliers = List.map applyFiltersOnGPU devicesForStream |> List.map (fun f -> f filters)
-          let imagesToProcess = 
-            Streaming.listAllFiles input
-            |> List.map (fun file -> Streaming.Img(ImageProcessing.loadAsImage file))
-          let start = System.DateTime.Now
-          Streaming.processAllLoadedFiles imagesToProcess appliers
-          //Streaming.processAllFiles input output appliers
-          printfn  $"TotalTime = %f{(System.DateTime.Now - start).TotalMilliseconds}"
+                sw.Restart()
+                let mutable current = image
+                for filter in filters do
+                    current <- ImageProcessing.applyFilter filter current
+                let processTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Process             : {processTime,8:F1} ms"
 
-        (*
-        match platform with
-        | Platforms.CPU -> 
-            let mutable image = ImageProcessing.loadAs2DArray input
-            printfn $"Device: CPU"
-            let start = System.DateTime.Now
-            for filter in filters do
-                image <- ImageProcessing.applyFilter filter image
-            printfn $"CPU processing time: {(System.DateTime.Now - start).TotalMilliseconds} ms"
-            ImageProcessing.save2DByteArrayAsImage image output
-        | Platforms.CPUParallel -> 
-            let mutable image = ImageProcessing.loadAs2DArray input
-            printfn $"Device: CPU, parallel"
-            let start = System.DateTime.Now
-            for filter in filters do
-                image <- ImageProcessing.applyFilterCpuParallel filter image
-            printfn $"CPU processing time: {(System.DateTime.Now - start).TotalMilliseconds} ms"
-            ImageProcessing.save2DByteArrayAsImage image output
-        *)
-        (*| _ ->             
-            let start = System.DateTime.Now
-            let grayscaleImage = ImageProcessing.loadAsImage input
-            printfn $"Image reading time: {(System.DateTime.Now - start).TotalMilliseconds} ms"
+                sw.Restart()
+                ImageProcessing.save2DByteArrayAsImage current output
+                let saveTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Save                : {saveTime,8:F1} ms"
+                printfn $"  ----------------------------------"
+                printfn $"  Total               : {loadTime + processTime + saveTime,8:F1} ms"
 
-            let start = System.DateTime.Now
-            let result = applyFiltersOnGPU filters grayscaleImage
-            printfn $"GPU processing time: {(System.DateTime.Now - start).TotalMilliseconds} ms"            
-            printfn $"R: %A{result}"
-            ImageProcessing.saveImage result output
-            *)
-(*
+            | Platforms.CPUParallel ->
+                let sw = Stopwatch.StartNew()
+                let image = ImageProcessing.loadAs2DArray input
+                let loadTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Load                : {loadTime,8:F1} ms"
 
-        let start = System.DateTime.Now
+                sw.Restart()
+                let mutable current = image
+                for filter in filters do
+                    current <- ImageProcessing.applyFilterCpuParallel filter current
+                let processTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Process             : {processTime,8:F1} ms"
 
-        Streaming.processAllFiles input output [
-            applyFiltersOnGPU filters
-        ]
+                sw.Restart()
+                ImageProcessing.save2DByteArrayAsImage current output
+                let saveTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Save                : {saveTime,8:F1} ms"
+                printfn $"  ----------------------------------"
+                printfn $"  Total               : {loadTime + processTime + saveTime,8:F1} ms"
 
-        printfn
-            $"TotalTime = %f{(System.DateTime.Now
-                              - start)
-                                 .TotalMilliseconds}"
+            | Platforms.CPUOpencl
+            | Platforms.Nvidia
+            | Platforms.IntelGPU
+            | Platforms.AnyGPU ->
+                let device =
+                    match platform with
+                    | Platforms.CPUOpencl ->
+                        ClDevice.GetAvailableDevices(platform = Platform.Custom "Portable*") |> Seq.head
+                    | Platforms.Nvidia ->
+                        ClDevice.GetAvailableDevices(platform = Platform.Nvidia) |> Seq.head
+                    | Platforms.IntelGPU ->
+                        ClDevice.GetAvailableDevices(platform = Platform.Intel) |> Seq.head
+                    | _ -> ClDevice.GetFirstAppropriateDevice()
+                printfn $"  Device: %s{device.Name}"
 
-  *)      
-        0
+                let sw = Stopwatch.StartNew()
+                let image = ImageProcessing.loadAsImage input
+                let loadTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Load                : {loadTime,8:F1} ms"
+
+                let applier = createGPUApplier platform filters (int workGroupSize)
+
+                sw.Restart()
+                let result = applier image
+                let processTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Process             : {processTime,8:F1} ms"
+
+                sw.Restart()
+                ImageProcessing.saveImage result output
+                let saveTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  Save                : {saveTime,8:F1} ms"
+                printfn $"  ----------------------------------"
+                printfn $"  Total               : {loadTime + processTime + saveTime,8:F1} ms"
+
+            | _ ->
+                printfn $"Unknown platform: %A{platform}"
+                exit 1
+
+            0
+
+        let runStreaming () =
+            printfn "\n========== Streaming ==========\n"
+            printfn $"  Workers: %A{workers}\n"
+
+            if not (System.IO.Directory.Exists input) then
+                printfn "Error: --input must be a directory for streaming mode"
+                1
+            else
+                let appliers = workers |> List.map (fun p ->
+                    match p with
+                    | Platforms.CPUSequential ->
+                        printfn $"  Worker: CPUSequential"
+                        ImageProcessing.applyFiltersCPU filters
+                    | Platforms.CPUParallel ->
+                        printfn $"  Worker: CPUParallel"
+                        ImageProcessing.applyFiltersCPUParallel filters
+                    | Platforms.CPUOpencl
+                    | Platforms.Nvidia
+                    | Platforms.IntelGPU
+                    | Platforms.AnyGPU ->
+                        createGPUApplier p filters (int workGroupSize)
+                    | _ ->
+                        printfn $"  Unknown platform: %A{p}"
+                        failwithf "Unknown platform: %A{p}"
+                )
+
+                printfn ""
+                let sw = Stopwatch.StartNew()
+                Streaming.processAllFiles input output appliers
+                let totalTime = sw.Elapsed.TotalMilliseconds
+                printfn $"  ----------------------------------"
+                printfn $"  Total               : {totalTime,8:F1} ms"
+                0
+
+        match workers with
+        | _ :: _ -> runStreaming ()
+        | [] -> runSingleImage ()
