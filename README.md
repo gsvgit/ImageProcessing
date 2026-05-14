@@ -127,16 +127,28 @@ Common parameters across all classes:
 dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks
 
 # Quick smoke test (ShortRun, single kernel):
-dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --job short --filter *K0Benchmark*
-
-# Selective kernel and device:
-dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --filter "*K3Benchmark*POCL*"
-
-# Run only one device:
-dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --filter "*Nvidia*"
+dotnet run -c Release --project benchmarks/MatrixMultiplication.Benchmarks -- --job short --filter '*K0Benchmark*'
 ```
 
 BenchmarkDotNet passes remaining CLI arguments (like `--filter`, `--job`, `--stopOnFirstError`) through to its own parser. Results are exported as CSV, Markdown, and HTML to `BenchmarkDotNet.Artifacts/results/`.
+
+### Analysis script
+
+The Python script [`benchmarks/analyze_benchmarks.py`](benchmarks/analyze_benchmarks.py) with `--mode mxm` reads all 5 kernel CSVs and generates two comparison plots:
+
+- **Best config per kernel** (2×3 grid of 5 subplots): for each kernel K0–K4, bars show minimum execution time per (N, Device) triple, annotated with the configuration that achieved that minimum (LWS for K0–K2; LWS + WPT for K3; LWS + TTS for K4)
+- **Per-device all configurations** (1×3 grid): for each device (Intel UHD Graphics 620, NVIDIA GeForce MX150, POCL), all valid configs are shown as individual bars grouped by matrix size then by kernel, with N-group labels on the top axis and kernel color legend
+
+![MxM best config per kernel](figures/benchmark_mxm_best_cfg.svg)
+
+![MxM per-device configurations](figures/benchmark_mxm_per_device.svg)
+
+**Requirements:** `pandas`, `matplotlib`, `numpy`
+
+```bash
+pip install pandas matplotlib numpy
+python benchmarks/analyze_benchmarks.py --mode mxm
+```
 
 ---
 
@@ -171,11 +183,8 @@ dotnet run -c Release --project benchmarks/ImageProcessing.Benchmarks
 # Quick smoke test (CPU only, ShortRun):
 dotnet run -c Release --project benchmarks/ImageProcessing.Benchmarks -- --job short --filter *CpuFilterBench*
 
-# GPU benchmarks with specific LWS range:
-dotnet run -c Release --project benchmarks/ImageProcessing.Benchmarks -- --filter *GpuFilterBench*
-
-# Run only one device variant:
-dotnet run -c Release --project benchmarks/ImageProcessing.Benchmarks -- --filter "*CPUParallel*"
+# GPU benchmarks:
+dotnet run -c Release --project benchmarks/ImageProcessing.Benchmarks -- --filter '*GpuFilterBench*'
 ```
 
 BenchmarkDotNet passes remaining CLI arguments (like `--filter`, `--job`, `--stopOnFirstError`) through to its own parser. Results are exported as CSV, Markdown, and HTML to `BenchmarkDotNet.Artifacts/results/`.
