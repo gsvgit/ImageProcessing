@@ -340,6 +340,193 @@ def analyze_mxm():
     fig3.savefig(out3, format='svg')
     print(f'Saved: {out3}')
 
+    # ────────── Plot set 4: Speedup over K0 ──────────
+
+    k0_best = (
+        all_kernels[all_kernels['Kernel'] == 'K0']
+        .groupby(['Device', 'N'])['Time_ms']
+        .min()
+        .reset_index()
+        .rename(columns={'Time_ms': 'K0_Time'})
+    )
+
+    fig4, axes4 = plt.subplots(2, 2, figsize=(14, 10))
+    axes4_flat = axes4.flatten()
+
+    for idx, kernel in enumerate(kernel_names[1:]):
+        ax = axes4_flat[idx]
+        kdf = all_kernels[all_kernels['Kernel'] == kernel]
+
+        best = (
+            kdf.loc[kdf.groupby(['Device', 'N'])['Time_ms'].idxmin()]
+            .reset_index(drop=True)
+        )
+        best = best.merge(k0_best, on=['Device', 'N'], how='left')
+        best['Speedup'] = best['K0_Time'] / best['Time_ms']
+
+        title_parts = [kernel]
+        for dev in device_names:
+            dev_best = best[best['Device'] == dev]
+            if len(dev_best):
+                overall_best = dev_best.loc[dev_best['Time_ms'].idxmin()]
+                title_parts.append(f'{dev}: {overall_best["ConfigLabel"]}')
+            else:
+                title_parts.append(f'{dev}: —')
+
+        x_n = np.arange(len(n_values))
+        bar_w = 0.25
+
+        for i, dev in enumerate(device_names):
+            subset = best[best['Device'] == dev].set_index('N')
+            vals = [subset.at[n, 'Speedup'] if n in subset.index else np.nan
+                    for n in n_values]
+            bars = ax.bar(x_n + i * bar_w, vals, bar_w,
+                          label=dev, color=device_colors[dev])
+
+            for j, (n, v) in enumerate(zip(n_values, vals)):
+                if not np.isnan(v):
+                    row = subset.loc[n]
+                    ax.text(x_n[j] + i * bar_w, v, row['ConfigLabel'],
+                            ha='center', va='bottom', fontsize=6, rotation=45)
+
+        ax.axhline(y=1.0, color='gray', linestyle='--', linewidth=0.7)
+        ax.set_xticks(x_n + bar_w)
+        ax.set_xticklabels([str(n) for n in n_values])
+        ax.set_ylabel('Speedup over K0')
+        ax.set_title('  |  '.join(title_parts), fontsize=9)
+        ax.grid(axis='y', alpha=0.3)
+        if idx == 0:
+            ax.legend(fontsize=7)
+
+    fig4.tight_layout()
+    out4 = benchmarks_dir / "benchmark_mxm_speedup_over_k0.svg"
+    fig4.savefig(out4, format='svg')
+    print(f'Saved: {out4}')
+
+    # ────────── Plot set 5: Worst / best spread ──────────
+
+    fig5, axes5 = plt.subplots(2, 3, figsize=(18, 10))
+    axes5_flat = axes5.flatten()
+    axes5_flat[5].set_visible(False)
+
+    for idx, kernel in enumerate(kernel_names):
+        ax = axes5_flat[idx]
+        kdf = all_kernels[all_kernels['Kernel'] == kernel]
+
+        best_idx = kdf.groupby(['Device', 'N'])['Time_ms'].idxmin()
+        worst_idx = kdf.groupby(['Device', 'N'])['Time_ms'].idxmax()
+
+        best = kdf.loc[best_idx][['Device', 'N', 'Time_ms', 'ConfigLabel']].rename(
+            columns={'Time_ms': 'Best_Time', 'ConfigLabel': 'Best_Label'})
+        worst = kdf.loc[worst_idx][['Device', 'N', 'Time_ms', 'ConfigLabel']].rename(
+            columns={'Time_ms': 'Worst_Time', 'ConfigLabel': 'Worst_Label'})
+
+        aggr = best.merge(worst, on=['Device', 'N'])
+        aggr['Ratio'] = aggr['Worst_Time'] / aggr['Best_Time']
+        aggr['Label'] = 'best: ' + aggr['Best_Label'] + '\nworst: ' + aggr['Worst_Label']
+
+        title_parts = [kernel]
+        for dev in device_names:
+            if dev in aggr['Device'].values:
+                title_parts.append(dev)
+            else:
+                title_parts.append(f'{dev}: —')
+
+        x_n = np.arange(len(n_values))
+        bar_w = 0.25
+
+        for i, dev in enumerate(device_names):
+            subset = aggr[aggr['Device'] == dev].set_index('N')
+            vals = [subset.at[n, 'Ratio'] if n in subset.index else np.nan
+                    for n in n_values]
+            bars = ax.bar(x_n + i * bar_w, vals, bar_w,
+                          label=dev, color=device_colors[dev])
+
+            for j, (n, v) in enumerate(zip(n_values, vals)):
+                if not np.isnan(v):
+                    row = subset.loc[n]
+                    ax.text(x_n[j] + i * bar_w, v / 2, row['Label'],
+                            ha='center', va='center', fontsize=5)
+
+        ax.axhline(y=1.0, color='gray', linestyle='--', linewidth=0.7)
+        ax.set_xticks(x_n + bar_w)
+        ax.set_xticklabels([str(n) for n in n_values])
+        ax.set_ylabel('Worst / Best Time Ratio')
+        ax.set_title(f'{kernel} — Config Sensitivity', fontsize=10)
+        ax.grid(axis='y', alpha=0.3)
+        if idx == 0:
+            ax.legend(fontsize=7)
+
+    fig5.tight_layout()
+    out5 = benchmarks_dir / "benchmark_mxm_spread.svg"
+    fig5.savefig(out5, format='svg')
+    print(f'Saved: {out5}')
+
+    # ────────── Plot set 6: Speedup over previous kernel ──────────
+
+    fig6, axes6 = plt.subplots(2, 2, figsize=(14, 10))
+    axes6_flat = axes6.flatten()
+
+    pairs = list(zip(kernel_names[:-1], kernel_names[1:]))
+
+    for idx, (prev_k, curr_k) in enumerate(pairs):
+        ax = axes6_flat[idx]
+        prev_best = (
+            all_kernels[all_kernels['Kernel'] == prev_k]
+            .groupby(['Device', 'N'])['Time_ms']
+            .min()
+            .reset_index()
+            .rename(columns={'Time_ms': 'Prev_Time'})
+        )
+        curr_best = (
+            all_kernels[all_kernels['Kernel'] == curr_k]
+            .loc[lambda df: df.groupby(['Device', 'N'])['Time_ms'].idxmin()]
+            .reset_index(drop=True)
+        )
+
+        merged = curr_best.merge(prev_best, on=['Device', 'N'], how='left')
+        merged['Speedup'] = merged['Prev_Time'] / merged['Time_ms']
+
+        title_parts = [f'{curr_k} over {prev_k}']
+        for dev in device_names:
+            dev_data = merged[merged['Device'] == dev]
+            if len(dev_data):
+                overall_best = dev_data.loc[dev_data['Time_ms'].idxmin()]
+                title_parts.append(f'{dev}: {overall_best["ConfigLabel"]}')
+            else:
+                title_parts.append(f'{dev}: —')
+
+        x_n = np.arange(len(n_values))
+        bar_w = 0.25
+
+        for i, dev in enumerate(device_names):
+            subset = merged[merged['Device'] == dev].set_index('N')
+            vals = [subset.at[n, 'Speedup'] if n in subset.index else np.nan
+                    for n in n_values]
+            ax.bar(x_n + i * bar_w, vals, bar_w,
+                   label=dev, color=device_colors[dev])
+
+            for j, n in enumerate(n_values):
+                if not np.isnan(vals[j]):
+                    row = subset.loc[n]
+                    ax.text(x_n[j] + i * bar_w, vals[j], row['ConfigLabel'],
+                            ha='center', va='bottom', fontsize=6, rotation=45)
+
+        ax.axhline(y=1.0, color='gray', linestyle='--', linewidth=0.7)
+        ax.set_xticks(x_n + bar_w)
+        ax.set_xticklabels([str(n) for n in n_values])
+        ax.set_ylabel('Speedup over Previous Kernel')
+        ax.set_title('  |  '.join(title_parts), fontsize=10)
+        ax.grid(axis='y', alpha=0.3)
+        if idx == 0:
+            ax.legend(fontsize=7)
+
+    fig6.tight_layout()
+    out6 = benchmarks_dir / "benchmark_mxm_speedup_stepwise.svg"
+    fig6.savefig(out6, format='svg')
+    print(f'Saved: {out6}')
+
+
 # ─── Entry point ──────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
